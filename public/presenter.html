@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whispering – 발표자 화면</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #050510;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 1.2rem;
+      background: rgba(10,10,25,0.95);
+      border-bottom: 1px solid #1a1a3a;
+      flex-shrink: 0;
+      z-index: 10;
+      transition: opacity 0.5s;
+    }
+
+    .topbar.hidden { opacity: 0; pointer-events: none; }
+
+    .logo { font-size: 1.1rem; font-weight: 800;
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    .top-right { display: flex; align-items: center; gap: 0.8rem; }
+    .session-tag { font-size: 0.8rem; color: #666; }
+    .session-val { font-size: 0.82rem; color: #a78bfa; font-weight: 600; }
+
+    .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+    .conn-dot.offline { background: #ef4444; }
+
+    .btn-fs {
+      background: #1a1a3a; border: 1px solid #2a2a4a; border-radius: 8px;
+      padding: 0.35rem 0.7rem; color: #888; cursor: pointer; font-size: 0.8rem;
+      transition: all 0.15s;
+    }
+    .btn-fs:hover { border-color: #7c3aed; color: #a78bfa; }
+
+    /* ── Main stage ── */
+    .stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      gap: 2rem;
+      position: relative;
+      min-height: 0;
+    }
+
+    /* ── Clock (always visible, small) ── */
+    .clock-widget {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.5rem;
+      font-size: 1rem;
+      color: #555;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Main display ── */
+    .main-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      width: 100%;
+      max-width: 900px;
+      transition: all 0.4s ease;
+    }
+
+    /* ── Message card ── */
+    .message-card {
+      width: 100%;
+      border-radius: 20px;
+      padding: 2.5rem 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .message-card.normal {
+      background: linear-gradient(135deg, #1a1a35, #1e1e4a);
+      border: 2px solid #3b3b7a;
+      box-shadow: 0 0 40px rgba(100, 100, 255, 0.1);
+    }
+
+    .message-card.caution {
+      background: linear-gradient(135deg, #2a1a00, #3a2200);
+      border: 2px solid #d97706;
+      box-shadow: 0 0 40px rgba(217, 119, 6, 0.2);
+    }
+
+    .message-card.urgent {
+      background: linear-gradient(135deg, #2a0000, #3a0000);
+      border: 2px solid #dc2626;
+      box-shadow: 0 0 40px rgba(220, 38, 38, 0.3);
+      animation: urgentPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes urgentPulse {
+      0%, 100% { box-shadow: 0 0 40px rgba(220, 38, 38, 0.3); }
+      50% { box-shadow: 0 0 80px rgba(220, 38, 38, 0.6); }
+    }
+
+    .message-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-weight: 600;
+      opacity: 0.6;
+    }
+
+    .message-text {
+      font-size: clamp(1.4rem, 4vw, 2.8rem);
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.3;
+      word-break: keep-all;
+    }
+
+    .message-text.normal  { color: #e0e0ff; }
+    .message-text.caution { color: #fbbf24; }
+    .message-text.urgent  { color: #f87171; }
+
+    .message-time {
+      font-size: 0.75rem;
+      opacity: 0.4;
+    }
+
+    /* ── Timer display ── */
+    .timer-widget {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .timer-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #555;
+      font-weight: 600;
+    }
+
+    .timer-digits {
+      font-size: clamp(3rem, 12vw, 7rem);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.05em;
+      color: #a78bfa;
+      transition: color 0.3s;
+    }
+
+    .timer-digits.warning { color: #fbbf24; }
+    .timer-digits.danger  { color: #f87171; animation: blink 0.8s step-end infinite; }
+
+    @keyframes blink { 50% { opacity: 0.2; } }
+
+    /* ── Full clock mode ── */
+    .clock-full {
+      font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: #a78bfa;
+      letter-spacing: 0.05em;
+    }
+
+    .clock-date {
+      font-size: clamp(1rem, 3vw, 1.8rem);
+      color: #555;
+      letter-spacing: 0.1em;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      color: #222;
+    }
+
+    .empty-icon { font-size: 4rem; opacity: 0.3; }
+    .empty-text { font-size: 1rem; color: #2a2a4a; }
+
+    /* ── New message animation ── */
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-20px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .message-card.animate { animation: slideIn 0.35s ease; }
+
+    /* ── Offline banner ── */
+    .offline-banner {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(220, 38, 38, 0.9);
+      color: #fff;
+      text-align: center;
+      padding: 0.6rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transform: translateY(100%);
+      transition: transform 0.3s;
+      z-index: 100;
+    }
+
+    .offline-banner.show { transform: translateY(0); }
+
+    /* ── Fullscreen hide cursor ── */
+    body.hide-cursor * { cursor: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="topbar" id="topbar">
+  <div class="logo">Whispering</div>
+  <div class="top-right">
+    <span class="session-tag">세션</span>
+    <span class="session-val" id="sessionDisplay">—</span>
+    <div class="conn-dot offline" id="connDot"></div>
+    <button class="btn-fs" id="btnFs" onclick="toggleFullscreen()">⛶ 전체화면</button>
+  </div>
+</div>
+
+<div class="stage" id="stage">
+  <div class="clock-widget" id="clockWidget"></div>
+
+  <div class="main-display" id="mainDisplay">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">💬</div>
+      <div class="empty-text">교육 담당자의 메시지를 기다리는 중…</div>
+    </div>
+  </div>
+</div>
+
+<div class="offline-banner" id="offlineBanner">
+  ⚠️ 연결이 끊어졌습니다. 재연결 중…
+</div>
+
+<script>
+  // ── State ──
+  const params  = new URLSearchParams(location.search);
+  const SESSION = params.get('session') || 'default';
+  let ws, currentMessage = null, timerState = null, displayMode = 'both';
+  let timerInterval, timerSecondsLeft = 0;
+  let idleTimer, topbarHidden = false;
+
+  document.getElementById('sessionDisplay').textContent = SESSION;
+
+  // ── Clock ──
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('clockWidget').textContent = `${h}:${m}:${s}`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // ── WebSocket ──
+  function connect() {
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${proto}//${location.host}`);
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: 'join', sessionId: SESSION, payload: { role: 'presenter' } }));
+      setConnected(true);
+    };
+
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      switch (msg.type) {
+        case 'message':      currentMessage = msg.payload; render(); break;
+        case 'clear_message': currentMessage = null; render(); break;
+        case 'timer':        handleTimer(msg.payload); break;
+        case 'clear_timer':  clearTimer(); break;
+        case 'display_mode': displayMode = msg.payload.mode; render(); break;
+        case 'coordinator_status':
+          // could show coordinator status if needed
+          break;
+      }
+    };
+
+    ws.onclose = () => {
+      setConnected(false);
+      setTimeout(connect, 3000);
+    };
+
+    ws.onerror = () => ws.close();
+  }
+
+  function setConnected(on) {
+    document.getElementById('connDot').className = 'conn-dot' + (on ? '' : ' offline');
+    document.getElementById('offlineBanner').classList.toggle('show', !on);
+  }
+
+  // ── Timer ──
+  function handleTimer(payload) {
+    clearInterval(timerInterval);
+    timerState = payload;
+
+    if (payload.running && payload.startedAt) {
+      const elapsed = Math.floor((Date.now() - payload.startedAt) / 1000);
+      timerSecondsLeft = Math.max(0, payload.seconds - elapsed);
+      timerInterval = setInterval(() => {
+        timerSecondsLeft = Math.max(0, timerSecondsLeft - 1);
+        render();
+        if (timerSecondsLeft <= 0) clearInterval(timerInterval);
+      }, 1000);
+    } else {
+      timerSecondsLeft = payload.seconds;
+    }
+    render();
+  }
+
+  function clearTimer() {
+    clearInterval(timerInterval);
+    timerState = null;
+    timerSecondsLeft = 0;
+    render();
+  }
+
+  // ── Render ──
+  function render() {
+    const display = document.getElementById('mainDisplay');
+    const empty   = document.getElementById('emptyState');
+
+    const showMsg   = (displayMode === 'both' || displayMode === 'message') && currentMessage;
+    const showTimer = (displayMode === 'both' || displayMode === 'timer') && timerState;
+    const showClock = displayMode === 'clock';
+
+    display.innerHTML = '';
+
+    if (showClock) {
+      display.appendChild(buildClockFull());
+      return;
+    }
+
+    if (!showMsg && !showTimer) {
+      display.appendChild(buildEmpty());
+      return;
+    }
+
+    if (showMsg) display.appendChild(buildMessage(currentMessage));
+    if (showTimer) display.appendChild(buildTimer());
+  }
+
+  function buildMessage(msg) {
+    const card = document.createElement('div');
+    card.className = `message-card ${msg.urgency} animate`;
+
+    const labelMap = { normal: '📋 메시지', caution: '⚠️ 주의', urgent: '🚨 긴급' };
+    const timeStr = new Date(msg.timestamp).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+
+    card.innerHTML = `
+      <div class="message-label">${labelMap[msg.urgency] || '메시지'}</div>
+      <div class="message-text ${msg.urgency}">${escHtml(msg.text)}</div>
+      <div class="message-time">${timeStr} 수신</div>
+    `;
+    return card;
+  }
+
+  function buildTimer() {
+    const widget = document.createElement('div');
+    widget.className = 'timer-widget';
+
+    const m = Math.floor(timerSecondsLeft / 60);
+    const s = timerSecondsLeft % 60;
+    const timeStr = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+
+    let cls = '';
+    if (timerSecondsLeft <= 60 && timerSecondsLeft > 0) cls = 'warning';
+    if (timerSecondsLeft <= 10 && timerSecondsLeft > 0) cls = 'danger';
+    if (timerSecondsLeft === 0 && timerState) cls = 'danger';
+
+    widget.innerHTML = `
+      <div class="timer-label">⏱️ 남은 시간</div>
+      <div class="timer-digits ${cls}">${timeStr}</div>
+    `;
+    return widget;
+  }
+
+  function buildClockFull() {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0.8rem;';
+
+    const now  = new Date();
+    const h    = String(now.getHours()).padStart(2,'0');
+    const min  = String(now.getMinutes()).padStart(2,'0');
+    const sec  = String(now.getSeconds()).padStart(2,'0');
+    const days = ['일','월','화','수','목','금','토'];
+    const dateStr = `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
+
+    wrap.innerHTML = `
+      <div class="clock-full">${h}:${min}:${sec}</div>
+      <div class="clock-date">${dateStr}</div>
+    `;
+
+    // Keep updating
+    clearInterval(clockFullInterval);
+    clockFullInterval = setInterval(() => {
+      const n   = new Date();
+      const hh  = String(n.getHours()).padStart(2,'0');
+      const mm  = String(n.getMinutes()).padStart(2,'0');
+      const ss  = String(n.getSeconds()).padStart(2,'0');
+      const ds  = ['일','월','화','수','목','금','토'];
+      const dstr = `${n.getFullYear()}년 ${n.getMonth()+1}월 ${n.getDate()}일 (${ds[n.getDay()]})`;
+      const cf = document.querySelector('.clock-full');
+      const cd = document.querySelector('.clock-date');
+      if (cf) cf.textContent = `${hh}:${mm}:${ss}`;
+      if (cd) cd.textContent = dstr;
+    }, 1000);
+
+    return wrap;
+  }
+
+  let clockFullInterval;
+
+  function buildEmpty() {
+    const div = document.createElement('div');
+    div.className = 'empty-state';
+    div.innerHTML = `
+      <div class="empty-icon">💬</div>
+      <div class="empty-text">교육 담당자의 메시지를 기다리는 중…</div>
+    `;
+    return div;
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Fullscreen ──
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  document.addEventListener('fullscreenchange', () => {
+    const inFs = !!document.fullscreenElement;
+    document.getElementById('btnFs').textContent = inFs ? '✕ 전체화면 종료' : '⛶ 전체화면';
+    if (inFs) startIdleTimer();
+    else { clearTimeout(idleTimer); showTopbar(); document.body.classList.remove('hide-cursor'); }
+  });
+
+  function startIdleTimer() {
+    clearTimeout(idleTimer);
+    showTopbar();
+    idleTimer = setTimeout(() => { hideTopbar(); document.body.classList.add('hide-cursor'); }, 3000);
+  }
+
+  function showTopbar() {
+    topbarHidden = false;
+    document.getElementById('topbar').classList.remove('hidden');
+    document.body.classList.remove('hide-cursor');
+  }
+
+  function hideTopbar() {
+    topbarHidden = true;
+    document.getElementById('topbar').classList.add('hidden');
+  }
+
+  document.addEventListener('mousemove', () => {
+    if (document.fullscreenElement) startIdleTimer();
+  });
+
+  // Double-click to fullscreen
+  document.getElementById('stage').addEventListener('dblclick', toggleFullscreen);
+
+  // ── Init ──
+  connect();
+</script>
+</body>
+</html>

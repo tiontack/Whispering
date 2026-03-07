@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whispering – 교육 담당자</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      background: #1a1a2e;
+      border-bottom: 1px solid #2a2a4a;
+      flex-shrink: 0;
+    }
+
+    .logo { font-size: 1.4rem; font-weight: 800;
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    .session-info { display: flex; align-items: center; gap: 0.6rem; }
+    .session-label { font-size: 0.8rem; color: #666; }
+    .session-code { font-size: 0.9rem; color: #a78bfa; font-weight: 600;
+      background: #1e1040; padding: 0.3rem 0.8rem; border-radius: 20px; }
+
+    .status-row { display: flex; align-items: center; gap: 0.5rem; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+    .status-dot.offline { background: #ef4444; }
+    .status-text { font-size: 0.8rem; color: #888; }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 1rem;
+      padding: 1.2rem;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 14px;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .panel-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #666;
+      font-weight: 600;
+    }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 0.4rem; margin-bottom: 0.2rem; }
+    .tab {
+      padding: 0.45rem 1rem; border-radius: 8px; font-size: 0.85rem;
+      cursor: pointer; border: 1px solid #2a2a4a; background: transparent;
+      color: #888; transition: all 0.15s;
+    }
+    .tab.active { background: #1e1040; border-color: #5b21b6; color: #a78bfa; }
+    .tab:hover:not(.active) { border-color: #444; color: #ccc; }
+
+    /* ── Message Form ── */
+    .msg-form { display: flex; flex-direction: column; gap: 0.8rem; }
+
+    .urgency-row { display: flex; gap: 0.5rem; }
+    .urgency-btn {
+      flex: 1; padding: 0.45rem; border-radius: 8px; font-size: 0.8rem;
+      cursor: pointer; border: 1px solid #2a2a4a; background: transparent;
+      color: #888; transition: all 0.15s;
+    }
+    .urgency-btn.active-normal  { background: #14532d; border-color: #16a34a; color: #4ade80; }
+    .urgency-btn.active-caution { background: #451a03; border-color: #d97706; color: #fbbf24; }
+    .urgency-btn.active-urgent  { background: #450a0a; border-color: #dc2626; color: #f87171; }
+    .urgency-btn:hover { border-color: #555; color: #ccc; }
+
+    textarea {
+      width: 100%; min-height: 120px; max-height: 200px;
+      background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 10px;
+      padding: 0.8rem; color: #e0e0e0; font-size: 1rem; resize: vertical;
+      outline: none; font-family: inherit; line-height: 1.5; transition: border-color 0.2s;
+    }
+    textarea:focus { border-color: #7c3aed; }
+    textarea::placeholder { color: #555; }
+
+    .char-count { font-size: 0.75rem; color: #555; text-align: right; }
+
+    .btn-row { display: flex; gap: 0.6rem; }
+
+    .btn {
+      padding: 0.7rem 1.2rem; border-radius: 10px; font-size: 0.9rem;
+      cursor: pointer; border: none; font-weight: 600; transition: all 0.2s;
+    }
+    .btn-primary {
+      flex: 1; background: linear-gradient(135deg, #7c3aed, #5b21b6);
+      color: #fff;
+    }
+    .btn-primary:hover { background: linear-gradient(135deg, #8b5cf6, #6d28d9); transform: translateY(-1px); }
+    .btn-secondary {
+      background: #1e1e3a; border: 1px solid #333; color: #888;
+    }
+    .btn-secondary:hover { border-color: #555; color: #ccc; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+    /* ── Timer ── */
+    .timer-section { display: flex; flex-direction: column; gap: 0.8rem; }
+
+    .timer-presets { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .preset-btn {
+      padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.82rem;
+      cursor: pointer; border: 1px solid #2a2a4a; background: transparent;
+      color: #888; transition: all 0.15s;
+    }
+    .preset-btn:hover { border-color: #7c3aed; color: #a78bfa; }
+
+    .timer-custom {
+      display: flex; gap: 0.5rem; align-items: center;
+    }
+    .timer-custom input[type="number"] {
+      width: 65px; background: #0f0f1a; border: 1px solid #2a2a4a;
+      border-radius: 8px; padding: 0.5rem; color: #e0e0e0; font-size: 1rem;
+      text-align: center; outline: none;
+    }
+    .timer-custom input:focus { border-color: #7c3aed; }
+    .timer-custom span { color: #666; font-size: 0.85rem; }
+
+    .timer-display-large {
+      font-size: 2.5rem; font-weight: 700; text-align: center;
+      font-variant-numeric: tabular-nums; color: #a78bfa;
+      padding: 0.5rem; letter-spacing: 2px;
+    }
+    .timer-display-large.warning { color: #fbbf24; }
+    .timer-display-large.danger  { color: #f87171; animation: blink 0.8s step-end infinite; }
+
+    @keyframes blink { 50% { opacity: 0.3; } }
+
+    .timer-controls { display: flex; gap: 0.5rem; }
+    .timer-controls .btn { flex: 1; font-size: 0.85rem; padding: 0.55rem; }
+
+    .btn-green  { background: #14532d; border: 1px solid #16a34a; color: #4ade80; }
+    .btn-green:hover  { background: #166534; }
+    .btn-yellow { background: #451a03; border: 1px solid #d97706; color: #fbbf24; }
+    .btn-yellow:hover { background: #78350f; }
+    .btn-red    { background: #450a0a; border: 1px solid #dc2626; color: #f87171; }
+    .btn-red:hover    { background: #7f1d1d; }
+
+    /* ── Display Mode ── */
+    .display-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .display-btn {
+      padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem;
+      cursor: pointer; border: 1px solid #2a2a4a; background: transparent;
+      color: #888; transition: all 0.15s; text-align: left; display: flex;
+      align-items: center; gap: 0.6rem;
+    }
+    .display-btn:hover { border-color: #555; color: #ccc; }
+    .display-btn.active { background: #1e1040; border-color: #5b21b6; color: #a78bfa; }
+
+    /* ── History ── */
+    .history-list {
+      display: flex; flex-direction: column; gap: 0.5rem;
+      max-height: 200px; overflow-y: auto;
+    }
+    .history-item {
+      background: #0f0f1a; border: 1px solid #222; border-radius: 8px;
+      padding: 0.6rem 0.8rem; font-size: 0.85rem; color: #aaa;
+      cursor: pointer; transition: all 0.15s;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .history-item:hover { border-color: #444; color: #e0e0e0; }
+    .history-badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; flex-shrink: 0; }
+    .badge-normal  { background: #14532d; color: #4ade80; }
+    .badge-caution { background: #451a03; color: #fbbf24; }
+    .badge-urgent  { background: #450a0a; color: #f87171; }
+    .history-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ── Right sidebar ── */
+    .sidebar {
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+
+    /* ── Presenter count ── */
+    .presenter-info {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .count-badge {
+      background: #1e1040; color: #a78bfa; font-weight: 700;
+      font-size: 1.4rem; padding: 0.2rem 0.8rem; border-radius: 8px;
+    }
+
+    /* ── Preview ── */
+    .preview-box {
+      background: #0a0a15; border: 1px solid #1a1a3a; border-radius: 10px;
+      min-height: 80px; padding: 1rem; display: flex; align-items: center;
+      justify-content: center; text-align: center;
+    }
+    .preview-text { font-size: 1rem; font-weight: 600; }
+    .preview-text.normal  { color: #e0e0e0; }
+    .preview-text.caution { color: #fbbf24; }
+    .preview-text.urgent  { color: #f87171; }
+    .preview-empty { color: #333; font-size: 0.8rem; }
+
+    /* ── Notifications ── */
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 10px;
+      padding: 0.8rem 1.2rem; font-size: 0.9rem; color: #e0e0e0;
+      opacity: 0; transform: translateY(10px); transition: all 0.3s;
+      pointer-events: none; z-index: 1000;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 3px; }
+
+    @media (max-width: 700px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Whispering</div>
+  <div class="session-info">
+    <span class="session-label">세션</span>
+    <span class="session-code" id="sessionCodeDisplay">—</span>
+  </div>
+  <div class="status-row">
+    <div class="status-dot offline" id="statusDot"></div>
+    <span class="status-text" id="statusText">연결 중…</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- Left main panel -->
+  <div style="display:flex;flex-direction:column;gap:1rem;">
+
+    <!-- Tabs -->
+    <div class="panel" style="padding:0.8rem 1.2rem;gap:0.6rem;">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('message')">✉️ 메시지</button>
+        <button class="tab" onclick="switchTab('timer')">⏱️ 타이머</button>
+        <button class="tab" onclick="switchTab('display')">🖥️ 화면 설정</button>
+      </div>
+    </div>
+
+    <!-- Message Tab -->
+    <div class="panel" id="tab-message">
+      <div class="panel-title">메시지 보내기</div>
+
+      <div>
+        <div class="urgency-row">
+          <button class="urgency-btn active-normal" id="urgNormal"  onclick="setUrgency('normal')">🟢 일반</button>
+          <button class="urgency-btn" id="urgCaution" onclick="setUrgency('caution')">🟡 주의</button>
+          <button class="urgency-btn" id="urgUrgent"  onclick="setUrgency('urgent')">🔴 긴급</button>
+        </div>
+      </div>
+
+      <div class="msg-form">
+        <textarea id="msgInput" placeholder="발표자에게 전달할 메시지를 입력하세요…" maxlength="300"
+          oninput="updateCharCount()" onkeydown="handleMsgKey(event)"></textarea>
+        <div class="char-count"><span id="charCount">0</span> / 300</div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="sendMessage()">전송 ↵</button>
+          <button class="btn btn-secondary" onclick="clearMessage()">메시지 지우기</button>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div>
+        <div class="panel-title" style="margin-bottom:0.6rem;">최근 메시지</div>
+        <div class="history-list" id="historyList">
+          <div style="color:#333;font-size:0.8rem;text-align:center;padding:0.5rem;">아직 보낸 메시지가 없습니다</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timer Tab -->
+    <div class="panel" id="tab-timer" style="display:none;">
+      <div class="panel-title">타이머 제어</div>
+
+      <div class="timer-section">
+        <div>
+          <div class="panel-title" style="margin-bottom:0.5rem;">빠른 설정</div>
+          <div class="timer-presets">
+            <button class="preset-btn" onclick="setTimerPreset(5)">5분</button>
+            <button class="preset-btn" onclick="setTimerPreset(10)">10분</button>
+            <button class="preset-btn" onclick="setTimerPreset(15)">15분</button>
+            <button class="preset-btn" onclick="setTimerPreset(20)">20분</button>
+            <button class="preset-btn" onclick="setTimerPreset(30)">30분</button>
+            <button class="preset-btn" onclick="setTimerPreset(45)">45분</button>
+            <button class="preset-btn" onclick="setTimerPreset(60)">60분</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel-title" style="margin-bottom:0.5rem;">직접 입력</div>
+          <div class="timer-custom">
+            <input type="number" id="customMin" min="0" max="99" value="0" placeholder="분" />
+            <span>분</span>
+            <input type="number" id="customSec" min="0" max="59" value="0" placeholder="초" />
+            <span>초</span>
+            <button class="btn btn-secondary" style="font-size:0.8rem;padding:0.5rem 0.8rem;" onclick="setCustomTimer()">설정</button>
+          </div>
+        </div>
+
+        <div class="timer-display-large" id="timerDisplay">00:00</div>
+
+        <div class="timer-controls">
+          <button class="btn btn-green"  onclick="startTimer()">▶ 시작</button>
+          <button class="btn btn-yellow" onclick="pauseTimer()">⏸ 일시정지</button>
+          <button class="btn btn-red"    onclick="stopTimer()">⏹ 초기화</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Display Tab -->
+    <div class="panel" id="tab-display" style="display:none;">
+      <div class="panel-title">발표자 화면 표시 설정</div>
+
+      <div class="display-options">
+        <button class="display-btn active" id="dm-both" onclick="setDisplayMode('both')">
+          <span>📋</span> 메시지 + 타이머 (기본)
+        </button>
+        <button class="display-btn" id="dm-message" onclick="setDisplayMode('message')">
+          <span>✉️</span> 메시지만 표시
+        </button>
+        <button class="display-btn" id="dm-timer" onclick="setDisplayMode('timer')">
+          <span>⏱️</span> 타이머만 표시
+        </button>
+        <button class="display-btn" id="dm-clock" onclick="setDisplayMode('clock')">
+          <span>🕐</span> 현재 시각 표시
+        </button>
+      </div>
+
+      <div style="padding-top:0.5rem; border-top: 1px solid #2a2a4a;">
+        <div class="panel-title" style="margin-bottom:0.6rem;">발표자 화면 링크</div>
+        <div style="display:flex;gap:0.5rem;">
+          <input type="text" id="presenterLink" readonly style="flex:1;font-size:0.8rem;color:#888;" />
+          <button class="btn btn-secondary" style="font-size:0.8rem;padding:0.5rem 0.8rem;" onclick="copyLink()">복사</button>
+        </div>
+        <p style="font-size:0.75rem;color:#555;margin-top:0.4rem;">발표자에게 이 링크를 공유하세요</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right Sidebar -->
+  <div class="sidebar">
+
+    <!-- Status -->
+    <div class="panel">
+      <div class="panel-title">연결 상태</div>
+      <div class="presenter-info">
+        <span style="font-size:0.9rem;color:#888;">접속 중인 발표자</span>
+        <span class="count-badge" id="presenterCount">0</span>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="panel">
+      <div class="panel-title" style="margin-bottom:0.6rem;">발표자 화면 미리보기</div>
+      <div class="preview-box" id="previewBox">
+        <span class="preview-empty">전송된 메시지 없음</span>
+      </div>
+    </div>
+
+    <!-- Quick messages -->
+    <div class="panel">
+      <div class="panel-title" style="margin-bottom:0.6rem;">빠른 메시지</div>
+      <div style="display:flex;flex-direction:column;gap:0.4rem;">
+        <button class="display-btn" onclick="quickMsg('남은 시간 5분입니다')">⏰ 남은 시간 5분</button>
+        <button class="display-btn" onclick="quickMsg('속도를 조금 올려주세요')">🚀 속도 업</button>
+        <button class="display-btn" onclick="quickMsg('속도를 조금 줄여주세요')">🐢 속도 다운</button>
+        <button class="display-btn" onclick="quickMsg('마이크 볼륨을 높여주세요')">🎙️ 볼륨 업</button>
+        <button class="display-btn" onclick="quickMsg('질문이 있습니다')">🙋 질문 있음</button>
+        <button class="display-btn" onclick="quickMsg('잠시 쉬는 시간입니다')">☕ 휴식 시간</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── State ──
+  const params   = new URLSearchParams(location.search);
+  const SESSION  = params.get('session') || 'default';
+  let ws, urgency = 'normal', timerSeconds = 0, timerRunning = false, timerInterval;
+  let displayMode = 'both';
+  const history = [];
+
+  document.getElementById('sessionCodeDisplay').textContent = SESSION;
+
+  // Presenter link
+  const presLink = `${location.origin}/presenter?session=${encodeURIComponent(SESSION)}`;
+  document.getElementById('presenterLink').value = presLink;
+
+  // ── WebSocket ──
+  function connect() {
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${proto}//${location.host}`);
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: 'join', sessionId: SESSION, payload: { role: 'coordinator' } }));
+      setStatus(true);
+    };
+
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'presenter_count') {
+        document.getElementById('presenterCount').textContent = msg.payload.count;
+      }
+    };
+
+    ws.onclose = () => {
+      setStatus(false);
+      setTimeout(connect, 3000);
+    };
+
+    ws.onerror = () => ws.close();
+  }
+
+  function setStatus(online) {
+    document.getElementById('statusDot').className  = 'status-dot' + (online ? '' : ' offline');
+    document.getElementById('statusText').textContent = online ? '연결됨' : '연결 끊김';
+  }
+
+  function send(data) {
+    if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ ...data, sessionId: SESSION }));
+  }
+
+  // ── Tabs ──
+  function switchTab(tab) {
+    ['message', 'timer', 'display'].forEach(t => {
+      document.getElementById(`tab-${t}`).style.display = t === tab ? 'flex' : 'none';
+    });
+    document.querySelectorAll('.tab').forEach((el, i) => {
+      el.classList.toggle('active', ['message','timer','display'][i] === tab);
+    });
+  }
+
+  // ── Urgency ──
+  function setUrgency(level) {
+    urgency = level;
+    document.getElementById('urgNormal').className  = 'urgency-btn' + (level==='normal'  ? ' active-normal'  : '');
+    document.getElementById('urgCaution').className = 'urgency-btn' + (level==='caution' ? ' active-caution' : '');
+    document.getElementById('urgUrgent').className  = 'urgency-btn' + (level==='urgent'  ? ' active-urgent'  : '');
+  }
+
+  // ── Message ──
+  function updateCharCount() {
+    const len = document.getElementById('msgInput').value.length;
+    document.getElementById('charCount').textContent = len;
+  }
+
+  function handleMsgKey(e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) sendMessage();
+  }
+
+  function sendMessage() {
+    const text = document.getElementById('msgInput').value.trim();
+    if (!text) return;
+    const payload = { text, urgency, timestamp: Date.now() };
+    send({ type: 'message', payload });
+    addHistory(payload);
+    updatePreview(text, urgency);
+    showToast('메시지를 전송했습니다');
+  }
+
+  function clearMessage() {
+    send({ type: 'clear_message' });
+    updatePreview(null, null);
+    document.getElementById('msgInput').value = '';
+    updateCharCount();
+    showToast('메시지를 지웠습니다');
+  }
+
+  function quickMsg(text) {
+    document.getElementById('msgInput').value = text;
+    updateCharCount();
+    sendMessage();
+  }
+
+  function addHistory(payload) {
+    history.unshift(payload);
+    if (history.length > 10) history.pop();
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const list = document.getElementById('historyList');
+    if (history.length === 0) {
+      list.innerHTML = '<div style="color:#333;font-size:0.8rem;text-align:center;padding:0.5rem;">아직 보낸 메시지가 없습니다</div>';
+      return;
+    }
+    list.innerHTML = history.map(h => `
+      <div class="history-item" onclick="reuseMsg('${h.text.replace(/'/g, "\\'")}', '${h.urgency}')">
+        <span class="history-badge badge-${h.urgency}">${{normal:'일반',caution:'주의',urgent:'긴급'}[h.urgency]}</span>
+        <span class="history-text">${escHtml(h.text)}</span>
+      </div>
+    `).join('');
+  }
+
+  function reuseMsg(text, urg) {
+    document.getElementById('msgInput').value = text;
+    setUrgency(urg);
+    updateCharCount();
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Preview ──
+  function updatePreview(text, urg) {
+    const box = document.getElementById('previewBox');
+    if (!text) {
+      box.innerHTML = '<span class="preview-empty">전송된 메시지 없음</span>';
+      return;
+    }
+    box.innerHTML = `<span class="preview-text ${urg}">${escHtml(text)}</span>`;
+  }
+
+  // ── Timer ──
+  function setTimerPreset(mins) { setTimer(mins * 60); }
+
+  function setCustomTimer() {
+    const m = parseInt(document.getElementById('customMin').value) || 0;
+    const s = parseInt(document.getElementById('customSec').value) || 0;
+    setTimer(m * 60 + s);
+  }
+
+  function setTimer(secs) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    timerSeconds = secs;
+    renderTimer();
+    send({ type: 'timer', payload: { seconds: secs, running: false, startedAt: null } });
+  }
+
+  function startTimer() {
+    if (timerSeconds <= 0) return;
+    timerRunning = true;
+    const startedAt = Date.now();
+    const initialSecs = timerSeconds;
+    send({ type: 'timer', payload: { seconds: initialSecs, running: true, startedAt } });
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      timerSeconds = Math.max(0, initialSecs - elapsed);
+      renderTimer();
+      if (timerSeconds <= 0) { clearInterval(timerInterval); timerRunning = false; }
+    }, 250);
+  }
+
+  function pauseTimer() {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    send({ type: 'timer', payload: { seconds: timerSeconds, running: false, startedAt: null } });
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    timerSeconds = 0;
+    renderTimer();
+    send({ type: 'clear_timer' });
+  }
+
+  function renderTimer() {
+    const m = Math.floor(timerSeconds / 60);
+    const s = timerSeconds % 60;
+    const el = document.getElementById('timerDisplay');
+    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    el.className = 'timer-display-large';
+    if (timerSeconds <= 60 && timerSeconds > 0) el.classList.add('warning');
+    if (timerSeconds <= 10 && timerSeconds > 0) { el.classList.remove('warning'); el.classList.add('danger'); }
+  }
+
+  // ── Display Mode ──
+  function setDisplayMode(mode) {
+    displayMode = mode;
+    ['both','message','timer','clock'].forEach(m => {
+      document.getElementById(`dm-${m}`).classList.toggle('active', m === mode);
+    });
+    send({ type: 'display_mode', payload: { mode } });
+  }
+
+  // ── Utils ──
+  function copyLink() {
+    navigator.clipboard.writeText(presLink).then(() => showToast('링크가 복사되었습니다'));
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  connect();
+</script>
+</body>
+</html>

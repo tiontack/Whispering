@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whispering</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo {
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 0.3rem;
+      background: linear-gradient(135deg, #7c3aed, #a78bfa, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tagline {
+      color: #888;
+      font-size: 0.95rem;
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+
+    .card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      color: #aaa;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: 400;
+    }
+
+    .session-row {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: #0f0f1a;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: #e0e0e0;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: #7c3aed;
+    }
+
+    input::placeholder { color: #555; }
+
+    .btn-gen {
+      background: #1e1e3a;
+      border: 1px solid #444;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: #aaa;
+      cursor: pointer;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .btn-gen:hover { border-color: #7c3aed; color: #a78bfa; }
+
+    .roles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .role-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 1.5rem 1rem;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .role-btn.coordinator {
+      background: linear-gradient(135deg, #1e1040, #2d1b5e);
+      border-color: #5b21b6;
+    }
+
+    .role-btn.presenter {
+      background: linear-gradient(135deg, #0f2027, #1a3a4a);
+      border-color: #1d4ed8;
+    }
+
+    .role-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .role-btn.coordinator:hover { border-color: #7c3aed; }
+    .role-btn.presenter:hover { border-color: #3b82f6; }
+
+    .role-icon { font-size: 2rem; }
+
+    .role-name {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .role-desc {
+      font-size: 0.75rem;
+      color: #888;
+      text-align: center;
+    }
+
+    .divider {
+      text-align: center;
+      color: #555;
+      font-size: 0.8rem;
+      margin: 1.2rem 0;
+      position: relative;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #2a2a4a;
+    }
+
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+  </style>
+</head>
+<body>
+  <div class="logo">Whispering</div>
+  <p class="tagline">강단의 발표자에게, 조용히 메시지를 전달하세요</p>
+
+  <div class="card">
+    <h2>세션 코드를 입력하고 역할을 선택하세요</h2>
+
+    <div class="session-row">
+      <input type="text" id="sessionId" placeholder="세션 코드 입력 (예: edu-2025)" maxlength="20" />
+      <button class="btn-gen" onclick="genSession()">랜덤 생성</button>
+    </div>
+
+    <div class="divider">역할 선택</div>
+
+    <div class="roles">
+      <a class="role-btn coordinator" onclick="go('coordinator')" href="#">
+        <span class="role-icon">🎛️</span>
+        <span class="role-name">교육 담당자</span>
+        <span class="role-desc">메시지를 보내고<br>타이머를 제어합니다</span>
+      </a>
+      <a class="role-btn presenter" onclick="go('presenter')" href="#">
+        <span class="role-icon">🖥️</span>
+        <span class="role-name">발표자</span>
+        <span class="role-desc">메시지와 타이머를<br>화면에서 확인합니다</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    function genSession() {
+      const words = ['edu', 'class', 'lecture', 'seminar', 'talk', 'meet'];
+      const nums = Math.floor(1000 + Math.random() * 9000);
+      const word = words[Math.floor(Math.random() * words.length)];
+      document.getElementById('sessionId').value = `${word}-${nums}`;
+    }
+
+    function go(role) {
+      const sessionId = document.getElementById('sessionId').value.trim();
+      if (!sessionId) {
+        document.getElementById('sessionId').focus();
+        document.getElementById('sessionId').style.borderColor = '#ef4444';
+        setTimeout(() => {
+          document.getElementById('sessionId').style.borderColor = '';
+        }, 1500);
+        return;
+      }
+      window.location.href = `/${role}?session=${encodeURIComponent(sessionId)}`;
+    }
+
+    // Allow Enter key
+    document.getElementById('sessionId').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') go('coordinator');
+    });
+  </script>
+</body>
+</html>
