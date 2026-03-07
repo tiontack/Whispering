@@ -253,6 +253,14 @@
     .btn-stage-fs:hover { border-color: #0d9488; color: #5eead4; background: rgba(13,148,136,0.15); }
     .btn-stage-fs.hidden { opacity: 0; pointer-events: none; }
 
+    /* ── Stage fullscreen 상태 배경 ── */
+    .stage:fullscreen,
+    .stage:-webkit-full-screen,
+    .stage:-moz-full-screen {
+      background: #050510;
+      padding: 2rem;
+    }
+
     /* ── Picker refresh button ── */
     .btn-picker-refresh {
       background: transparent; border: 1px solid #2a2a4a; border-radius: 8px;
@@ -630,10 +638,10 @@
     return div;
   }
 
-  // ── Fullscreen ──
+  // ── Fullscreen (stage 요소만 전체화면) ──
   function toggleFullscreen() {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
+      document.getElementById('stage').requestFullscreen().catch(() => {});
     } else {
       document.exitFullscreen();
     }
@@ -643,24 +651,19 @@
     const inFs = !!document.fullscreenElement;
     document.getElementById('btnFs').textContent = inFs ? '✕ 전체화면 종료' : '⛶ 전체화면';
     document.getElementById('btnStageFs').textContent = inFs ? '✕ 전체화면 종료' : '⛶ 전체화면';
-    if (inFs) startIdleTimer();
-    else {
+    if (inFs) {
+      startIdleTimer();
+    } else {
       clearTimeout(idleTimer);
-      document.getElementById('topbar').classList.remove('hidden');
       document.getElementById('btnStageFs').classList.remove('hidden');
-      document.body.classList.remove('hide-cursor');
     }
   });
 
   function startIdleTimer() {
     clearTimeout(idleTimer);
-    document.getElementById('topbar').classList.remove('hidden');
     document.getElementById('btnStageFs').classList.remove('hidden');
-    document.body.classList.remove('hide-cursor');
     idleTimer = setTimeout(() => {
-      document.getElementById('topbar').classList.add('hidden');
       document.getElementById('btnStageFs').classList.add('hidden');
-      document.body.classList.add('hide-cursor');
     }, 3000);
   }
 
