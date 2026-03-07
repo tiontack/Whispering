@@ -12,9 +12,6 @@ RUN npm ci --omit=dev
 
 COPY . .
 
-# Persistent data volume
-VOLUME ["/app/data"]
-
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV DB_PATH=/app/data/whispering.db
