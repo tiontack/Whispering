@@ -31,10 +31,17 @@
       background: linear-gradient(135deg, #7c3aed, #a78bfa);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
-    .session-info { display: flex; align-items: center; gap: 0.6rem; }
+    .session-info { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
     .session-label { font-size: 0.8rem; color: #666; }
     .session-code { font-size: 0.9rem; color: #a78bfa; font-weight: 600;
       background: #1e1040; padding: 0.3rem 0.8rem; border-radius: 20px; }
+    .room-name-display { font-size: 0.95rem; color: #e0e0e0; font-weight: 700; }
+    .btn-lobby {
+      background: transparent; border: 1px solid #333; border-radius: 8px;
+      padding: 0.3rem 0.7rem; color: #888; cursor: pointer; font-size: 0.78rem;
+      transition: all 0.15s;
+    }
+    .btn-lobby:hover { border-color: #7c3aed; color: #a78bfa; }
 
     .status-row { display: flex; align-items: center; gap: 0.5rem; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
@@ -242,9 +249,13 @@
 <body>
 
 <header>
-  <div class="logo">Whispering</div>
+  <div style="display:flex;align-items:center;gap:0.8rem;">
+    <div class="logo">Whispering</div>
+    <button class="btn-lobby" onclick="location.href='/'">← 로비</button>
+  </div>
   <div class="session-info">
-    <span class="session-label">세션</span>
+    <span class="room-name-display" id="roomNameDisplay">—</span>
+    <span class="session-label">방 코드:</span>
     <span class="session-code" id="sessionCodeDisplay">—</span>
   </div>
   <div class="status-row">
@@ -410,15 +421,17 @@
 <script>
   // ── State ──
   const params   = new URLSearchParams(location.search);
-  const SESSION  = params.get('session') || 'default';
+  const SESSION  = params.get('room') || params.get('session') || 'default';
+  const ROOM_NAME = params.get('name') || SESSION;
   let ws, urgency = 'normal', timerSeconds = 0, timerRunning = false, timerInterval;
   let displayMode = 'both';
   const history = [];
 
   document.getElementById('sessionCodeDisplay').textContent = SESSION;
+  document.getElementById('roomNameDisplay').textContent = ROOM_NAME;
 
   // Presenter link
-  const presLink = `${location.origin}/presenter?session=${encodeURIComponent(SESSION)}`;
+  const presLink = `${location.origin}/presenter?room=${encodeURIComponent(SESSION)}&name=${encodeURIComponent(ROOM_NAME)}`;
   document.getElementById('presenterLink').value = presLink;
 
   // ── WebSocket ──
@@ -427,7 +440,7 @@
     ws = new WebSocket(`${proto}//${location.host}`);
 
     ws.onopen = () => {
-      ws.send(JSON.stringify({ type: 'join', sessionId: SESSION, payload: { role: 'coordinator' } }));
+      ws.send(JSON.stringify({ type: 'join', roomId: SESSION, payload: { role: 'coordinator', name: ROOM_NAME } }));
       setStatus(true);
     };
 
@@ -452,7 +465,7 @@
   }
 
   function send(data) {
-    if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ ...data, sessionId: SESSION }));
+    if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ ...data, roomId: SESSION }));
   }
 
   // ── Tabs ──

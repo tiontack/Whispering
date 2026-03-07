@@ -237,9 +237,12 @@
 <body>
 
 <div class="topbar" id="topbar">
-  <div class="logo">Whispering</div>
+  <div style="display:flex;align-items:center;gap:0.8rem;">
+    <div class="logo">Whispering</div>
+    <span class="session-val" id="roomNameDisplay" style="font-size:0.9rem;color:#e0e0e0;font-weight:700;">—</span>
+  </div>
   <div class="top-right">
-    <span class="session-tag">세션</span>
+    <span class="session-tag">방 코드</span>
     <span class="session-val" id="sessionDisplay">—</span>
     <div class="conn-dot offline" id="connDot"></div>
     <button class="btn-fs" id="btnFs" onclick="toggleFullscreen()">⛶ 전체화면</button>
@@ -263,13 +266,15 @@
 
 <script>
   // ── State ──
-  const params  = new URLSearchParams(location.search);
-  const SESSION = params.get('session') || 'default';
+  const params    = new URLSearchParams(location.search);
+  const SESSION   = params.get('room') || params.get('session') || 'default';
+  const ROOM_NAME = params.get('name') || SESSION;
   let ws, currentMessage = null, timerState = null, displayMode = 'both';
   let timerInterval, timerSecondsLeft = 0;
   let idleTimer, topbarHidden = false;
 
-  document.getElementById('sessionDisplay').textContent = SESSION;
+  document.getElementById('sessionDisplay').textContent  = SESSION;
+  document.getElementById('roomNameDisplay').textContent = ROOM_NAME;
 
   // ── Clock ──
   function updateClock() {
@@ -288,7 +293,7 @@
     ws = new WebSocket(`${proto}//${location.host}`);
 
     ws.onopen = () => {
-      ws.send(JSON.stringify({ type: 'join', sessionId: SESSION, payload: { role: 'presenter' } }));
+      ws.send(JSON.stringify({ type: 'join', roomId: SESSION, payload: { role: 'presenter', name: ROOM_NAME } }));
       setConnected(true);
     };
 

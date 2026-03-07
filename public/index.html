@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Whispering</title>
+  <title>Whispering – 로비</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -14,209 +14,366 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
+      padding: 1.1rem 2rem;
+      border-bottom: 1px solid #1a1a3a;
+      flex-shrink: 0;
     }
 
     .logo {
-      font-size: 2.8rem;
+      font-size: 1.6rem;
       font-weight: 800;
-      letter-spacing: -1px;
-      margin-bottom: 0.3rem;
+      letter-spacing: -0.5px;
       background: linear-gradient(135deg, #7c3aed, #a78bfa, #60a5fa);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
-    .tagline {
-      color: #888;
-      font-size: 0.95rem;
-      margin-bottom: 3rem;
-      text-align: center;
+    .tagline { color: #555; font-size: 0.85rem; }
+
+    /* ── Main layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 1.5rem;
+      padding: 1.5rem 2rem;
+      flex: 1;
+      min-height: 0;
     }
 
+    @media (max-width: 750px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    /* ── Card ── */
     .card {
       background: #1a1a2e;
       border: 1px solid #2a2a4a;
       border-radius: 16px;
-      padding: 2.5rem;
-      width: 100%;
-      max-width: 480px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      padding: 1.5rem;
     }
 
-    h2 {
-      font-size: 1.1rem;
-      color: #aaa;
-      margin-bottom: 1.5rem;
-      text-align: center;
-      font-weight: 400;
+    .card-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #555;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
     }
 
-    .session-row {
-      display: flex;
-      gap: 0.6rem;
-      margin-bottom: 1.5rem;
+    /* ── Form elements ── */
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 0.35rem;
     }
 
     input[type="text"] {
-      flex: 1;
+      width: 100%;
       background: #0f0f1a;
-      border: 1px solid #333;
+      border: 1px solid #2a2a4a;
       border-radius: 10px;
-      padding: 0.75rem 1rem;
+      padding: 0.7rem 0.9rem;
       color: #e0e0e0;
-      font-size: 1rem;
+      font-size: 0.95rem;
       outline: none;
       transition: border-color 0.2s;
+      margin-bottom: 1rem;
+    }
+    input[type="text"]:focus { border-color: #7c3aed; }
+    input::placeholder { color: #444; }
+    input.error { border-color: #ef4444 !important; animation: shake 0.3s ease; }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
     }
 
-    input[type="text"]:focus {
-      border-color: #7c3aed;
-    }
-
-    input::placeholder { color: #555; }
-
+    /* ── Room ID row ── */
+    .id-row { display: flex; gap: 0.5rem; align-items: flex-start; margin-bottom: 1rem; }
+    .id-row input { margin-bottom: 0; flex: 1; }
     .btn-gen {
-      background: #1e1e3a;
-      border: 1px solid #444;
-      border-radius: 10px;
-      padding: 0.75rem 1rem;
-      color: #aaa;
-      cursor: pointer;
-      font-size: 0.85rem;
-      white-space: nowrap;
-      transition: all 0.2s;
+      background: #1e1e3a; border: 1px solid #333; border-radius: 10px;
+      padding: 0.7rem 0.8rem; color: #888; cursor: pointer; font-size: 0.8rem;
+      white-space: nowrap; transition: all 0.2s; flex-shrink: 0;
     }
-
     .btn-gen:hover { border-color: #7c3aed; color: #a78bfa; }
 
-    .roles {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
+    /* ── Role buttons ── */
+    .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
 
     .role-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 1.5rem 1rem;
-      border-radius: 12px;
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-decoration: none;
-      color: inherit;
+      display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+      padding: 1rem 0.5rem; border-radius: 12px; border: 2px solid transparent;
+      cursor: pointer; transition: all 0.18s; text-decoration: none; color: inherit;
+      font-size: inherit; background: transparent;
     }
-
-    .role-btn.coordinator {
-      background: linear-gradient(135deg, #1e1040, #2d1b5e);
-      border-color: #5b21b6;
-    }
-
-    .role-btn.presenter {
-      background: linear-gradient(135deg, #0f2027, #1a3a4a);
-      border-color: #1d4ed8;
-    }
-
-    .role-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    }
-
+    .role-btn.coordinator { background: linear-gradient(135deg,#1e1040,#2d1b5e); border-color: #5b21b6; }
+    .role-btn.presenter   { background: linear-gradient(135deg,#0f2027,#1a3a4a); border-color: #1d4ed8; }
+    .role-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
     .role-btn.coordinator:hover { border-color: #7c3aed; }
-    .role-btn.presenter:hover { border-color: #3b82f6; }
+    .role-btn.presenter:hover   { border-color: #3b82f6; }
+    .role-icon { font-size: 1.6rem; }
+    .role-name { font-size: 0.88rem; font-weight: 600; }
+    .role-desc { font-size: 0.7rem; color: #888; text-align: center; }
 
-    .role-icon { font-size: 2rem; }
-
-    .role-name {
-      font-size: 1rem;
-      font-weight: 600;
-    }
-
-    .role-desc {
-      font-size: 0.75rem;
-      color: #888;
-      text-align: center;
-    }
-
+    /* ── Divider ── */
     .divider {
-      text-align: center;
-      color: #555;
-      font-size: 0.8rem;
-      margin: 1.2rem 0;
+      text-align: center; color: #444; font-size: 0.75rem; margin: 1rem 0;
       position: relative;
     }
-
     .divider::before, .divider::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 40%;
-      height: 1px;
-      background: #2a2a4a;
+      content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: #2a2a4a;
+    }
+    .divider::before { left: 0; }
+    .divider::after  { right: 0; }
+
+    /* ── Room list ── */
+    .room-list-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
     }
 
-    .divider::before { left: 0; }
-    .divider::after { right: 0; }
+    .live-badge {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.72rem; color: #22c55e; font-weight: 600;
+    }
+    .live-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #22c55e;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .room-grid {
+      display: flex; flex-direction: column; gap: 0.6rem;
+      max-height: calc(100vh - 220px); overflow-y: auto; padding-right: 2px;
+    }
+
+    .room-item {
+      background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 12px;
+      padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem;
+      transition: all 0.18s; cursor: default;
+    }
+    .room-item:hover { border-color: #3a3a6a; background: #12122a; }
+
+    .room-icon { font-size: 1.4rem; flex-shrink: 0; }
+
+    .room-info { flex: 1; min-width: 0; }
+    .room-name { font-size: 1rem; font-weight: 600; color: #e0e0e0;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .room-meta { font-size: 0.75rem; color: #666; margin-top: 0.2rem; display: flex; gap: 0.8rem; }
+    .room-stat { display: flex; align-items: center; gap: 0.25rem; }
+    .dot-coord { color: #a78bfa; }
+    .dot-pres  { color: #60a5fa; }
+
+    .room-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+    .join-btn {
+      padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.78rem;
+      cursor: pointer; border: 1px solid; font-weight: 600; transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .join-coord { background: #1e1040; border-color: #5b21b6; color: #a78bfa; }
+    .join-coord:hover { background: #2d1b5e; border-color: #7c3aed; }
+    .join-pres  { background: #0f2027; border-color: #1d4ed8; color: #60a5fa; }
+    .join-pres:hover  { background: #1a3a4a; border-color: #3b82f6; }
+
+    .room-id-tag {
+      font-size: 0.68rem; color: #444; font-family: monospace;
+      background: #0a0a18; border: 1px solid #1a1a3a; border-radius: 4px;
+      padding: 1px 5px; margin-top: 0.15rem; display: inline-block;
+    }
+
+    /* ── Empty state ── */
+    .empty-rooms {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.6rem; padding: 3rem 1rem; color: #333;
+    }
+    .empty-rooms .icon { font-size: 2.5rem; opacity: 0.4; }
+    .empty-rooms p { font-size: 0.85rem; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 2px; }
   </style>
 </head>
 <body>
+
+<header>
   <div class="logo">Whispering</div>
-  <p class="tagline">강단의 발표자에게, 조용히 메시지를 전달하세요</p>
+  <div class="tagline">강단의 발표자에게, 조용히 메시지를 전달하세요</div>
+</header>
 
-  <div class="card">
-    <h2>세션 코드를 입력하고 역할을 선택하세요</h2>
+<div class="layout">
 
-    <div class="session-row">
-      <input type="text" id="sessionId" placeholder="세션 코드 입력 (예: edu-2025)" maxlength="20" />
-      <button class="btn-gen" onclick="genSession()">랜덤 생성</button>
+  <!-- Left: Create / Join by code -->
+  <div style="display:flex;flex-direction:column;gap:1rem;">
+
+    <!-- Create Room -->
+    <div class="card">
+      <div class="card-title">방 만들기 / 참여</div>
+
+      <label>방 이름</label>
+      <input type="text" id="roomName" placeholder="예) 1강의실, 마케팅 세미나" maxlength="30" />
+
+      <label>방 코드 <span style="color:#444;font-size:0.72rem">(직접 입력하거나 랜덤 생성)</span></label>
+      <div class="id-row">
+        <input type="text" id="roomId" placeholder="예) edu-2025" maxlength="20" />
+        <button class="btn-gen" onclick="genId()">랜덤</button>
+      </div>
+
+      <div class="divider">역할 선택</div>
+
+      <div class="role-grid">
+        <button class="role-btn coordinator" onclick="go('coordinator')">
+          <span class="role-icon">🎛️</span>
+          <span class="role-name">교육 담당자</span>
+          <span class="role-desc">메시지·타이머 제어</span>
+        </button>
+        <button class="role-btn presenter" onclick="go('presenter')">
+          <span class="role-icon">🖥️</span>
+          <span class="role-name">발표자</span>
+          <span class="role-desc">메시지 수신·화면 표시</span>
+        </button>
+      </div>
     </div>
 
-    <div class="divider">역할 선택</div>
+  </div>
 
-    <div class="roles">
-      <a class="role-btn coordinator" onclick="go('coordinator')" href="#">
-        <span class="role-icon">🎛️</span>
-        <span class="role-name">교육 담당자</span>
-        <span class="role-desc">메시지를 보내고<br>타이머를 제어합니다</span>
-      </a>
-      <a class="role-btn presenter" onclick="go('presenter')" href="#">
-        <span class="role-icon">🖥️</span>
-        <span class="role-name">발표자</span>
-        <span class="role-desc">메시지와 타이머를<br>화면에서 확인합니다</span>
-      </a>
+  <!-- Right: Live room list -->
+  <div class="card" style="display:flex;flex-direction:column;">
+    <div class="room-list-header">
+      <div class="card-title" style="margin-bottom:0">활성 방 목록</div>
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    </div>
+
+    <div class="room-grid" id="roomGrid">
+      <div class="empty-rooms">
+        <div class="icon">🚪</div>
+        <p>현재 활성화된 방이 없습니다</p>
+        <p style="font-size:0.75rem;color:#2a2a4a;">첫 번째 방을 만들어 보세요!</p>
+      </div>
     </div>
   </div>
 
-  <script>
-    function genSession() {
-      const words = ['edu', 'class', 'lecture', 'seminar', 'talk', 'meet'];
-      const nums = Math.floor(1000 + Math.random() * 9000);
-      const word = words[Math.floor(Math.random() * words.length)];
-      document.getElementById('sessionId').value = `${word}-${nums}`;
+</div>
+
+<script>
+  // ── WebSocket for live room updates ──
+  let ws;
+
+  function connectLobby() {
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${proto}//${location.host}`);
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: 'lobby_join' }));
+    };
+
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'room_list') renderRooms(msg.payload.rooms);
+    };
+
+    ws.onclose = () => setTimeout(connectLobby, 3000);
+    ws.onerror = () => ws.close();
+  }
+
+  // ── Render room list ──
+  function renderRooms(roomList) {
+    const grid = document.getElementById('roomGrid');
+    if (!roomList.length) {
+      grid.innerHTML = `
+        <div class="empty-rooms">
+          <div class="icon">🚪</div>
+          <p>현재 활성화된 방이 없습니다</p>
+          <p style="font-size:0.75rem;color:#2a2a4a;">첫 번째 방을 만들어 보세요!</p>
+        </div>`;
+      return;
     }
 
-    function go(role) {
-      const sessionId = document.getElementById('sessionId').value.trim();
-      if (!sessionId) {
-        document.getElementById('sessionId').focus();
-        document.getElementById('sessionId').style.borderColor = '#ef4444';
-        setTimeout(() => {
-          document.getElementById('sessionId').style.borderColor = '';
-        }, 1500);
-        return;
-      }
-      window.location.href = `/${role}?session=${encodeURIComponent(sessionId)}`;
+    grid.innerHTML = roomList
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .map(r => `
+        <div class="room-item">
+          <div class="room-icon">${r.hasCoordinator ? '🟢' : '⚫'}</div>
+          <div class="room-info">
+            <div class="room-name">${escHtml(r.name)}</div>
+            <div class="room-meta">
+              <span class="room-stat">
+                <span class="dot-coord">🎛️</span>
+                ${r.hasCoordinator ? '담당자 접속' : '담당자 없음'}
+              </span>
+              <span class="room-stat">
+                <span class="dot-pres">🖥️</span>
+                발표자 ${r.presenterCount}명
+              </span>
+            </div>
+            <span class="room-id-tag">${escHtml(r.id)}</span>
+          </div>
+          <div class="room-actions">
+            <button class="join-btn join-coord" onclick="joinRoom('${escAttr(r.id)}', '${escAttr(r.name)}', 'coordinator')">입장 (담당)</button>
+            <button class="join-btn join-pres"  onclick="joinRoom('${escAttr(r.id)}', '${escAttr(r.name)}', 'presenter')">입장 (발표)</button>
+          </div>
+        </div>
+      `).join('');
+  }
+
+  // ── Navigation ──
+  function genId() {
+    const words = ['edu', 'class', 'lecture', 'seminar', 'talk', 'meet'];
+    const nums  = Math.floor(1000 + Math.random() * 9000);
+    const word  = words[Math.floor(Math.random() * words.length)];
+    document.getElementById('roomId').value = `${word}-${nums}`;
+  }
+
+  function go(role) {
+    const name = document.getElementById('roomName').value.trim();
+    let id     = document.getElementById('roomId').value.trim();
+
+    if (!id) {
+      // auto-generate if empty
+      const words = ['edu','class','lecture','seminar'];
+      id = words[Math.floor(Math.random() * words.length)] + '-' + Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('roomId').value = id;
     }
 
-    // Allow Enter key
-    document.getElementById('sessionId').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') go('coordinator');
-    });
-  </script>
+    const roomName = name || id;
+    navigate(id, roomName, role);
+  }
+
+  function joinRoom(id, name, role) {
+    document.getElementById('roomId').value   = id;
+    document.getElementById('roomName').value = name;
+    navigate(id, name, role);
+  }
+
+  function navigate(id, name, role) {
+    const params = new URLSearchParams({ room: id, name });
+    window.location.href = `/${role}?${params}`;
+  }
+
+  // ── Utils ──
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function escAttr(s) {
+    return String(s).replace(/'/g, "\\'").replace(/"/g, '\\"');
+  }
+
+  // Enter key shortcut
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.tagName === 'INPUT') go('coordinator');
+  });
+
+  connectLobby();
+</script>
 </body>
 </html>
