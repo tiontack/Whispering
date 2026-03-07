@@ -21,10 +21,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem 1.5rem;
+      padding: 0.8rem 1.5rem;
       background: #1a1a2e;
       border-bottom: 1px solid #2a2a4a;
       flex-shrink: 0;
+      gap: 1rem;
     }
 
     .logo { font-size: 1.4rem; font-weight: 800;
@@ -36,6 +37,7 @@
     .session-code { font-size: 0.9rem; color: #a78bfa; font-weight: 600;
       background: #1e1040; padding: 0.3rem 0.8rem; border-radius: 20px; }
     .room-name-display { font-size: 0.95rem; color: #e0e0e0; font-weight: 700; }
+
     .btn-lobby {
       background: transparent; border: 1px solid #333; border-radius: 8px;
       padding: 0.3rem 0.7rem; color: #888; cursor: pointer; font-size: 0.78rem;
@@ -43,7 +45,7 @@
     }
     .btn-lobby:hover { border-color: #7c3aed; color: #a78bfa; }
 
-    .status-row { display: flex; align-items: center; gap: 0.5rem; }
+    .status-row { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
     .status-dot.offline { background: #ef4444; }
     .status-text { font-size: 0.8rem; color: #888; }
@@ -51,9 +53,9 @@
     /* ── Layout ── */
     .layout {
       display: grid;
-      grid-template-columns: 1fr 300px;
+      grid-template-columns: 1fr 310px;
       gap: 1rem;
-      padding: 1.2rem;
+      padding: 1rem 1.2rem;
       flex: 1;
       min-height: 0;
     }
@@ -63,36 +65,51 @@
       background: #1a1a2e;
       border: 1px solid #2a2a4a;
       border-radius: 14px;
-      padding: 1.2rem;
+      padding: 1.1rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.9rem;
     }
 
     .panel-title {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: #666;
-      font-weight: 600;
+      color: #555;
+      font-weight: 700;
     }
 
     /* ── Tabs ── */
-    .tabs { display: flex; gap: 0.4rem; margin-bottom: 0.2rem; }
+    .tabs { display: flex; gap: 0.4rem; }
     .tab {
-      padding: 0.45rem 1rem; border-radius: 8px; font-size: 0.85rem;
+      padding: 0.42rem 0.9rem; border-radius: 8px; font-size: 0.82rem;
       cursor: pointer; border: 1px solid #2a2a4a; background: transparent;
       color: #888; transition: all 0.15s;
     }
     .tab.active { background: #1e1040; border-color: #5b21b6; color: #a78bfa; }
     .tab:hover:not(.active) { border-color: #444; color: #ccc; }
 
+    /* ── Target selector ── */
+    .target-row {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;
+    }
+    .target-label { font-size: 0.75rem; color: #555; margin-right: 0.2rem; flex-shrink: 0; }
+    .target-chip {
+      padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.78rem;
+      cursor: pointer; border: 1px solid #2a2a4a; background: transparent;
+      color: #888; transition: all 0.15s; white-space: nowrap;
+    }
+    .target-chip:hover { border-color: #555; color: #ccc; }
+    .target-chip.active-all    { background: #1e1040; border-color: #5b21b6; color: #a78bfa; font-weight: 600; }
+    .target-chip.active-section { background: #0f2a1a; border-color: #16a34a; color: #4ade80; font-weight: 600; }
+    .target-chip-empty { font-size: 0.75rem; color: #333; font-style: italic; }
+
     /* ── Message Form ── */
-    .msg-form { display: flex; flex-direction: column; gap: 0.8rem; }
+    .msg-form { display: flex; flex-direction: column; gap: 0.7rem; }
 
     .urgency-row { display: flex; gap: 0.5rem; }
     .urgency-btn {
-      flex: 1; padding: 0.45rem; border-radius: 8px; font-size: 0.8rem;
+      flex: 1; padding: 0.42rem; border-radius: 8px; font-size: 0.78rem;
       cursor: pointer; border: 1px solid #2a2a4a; background: transparent;
       color: #888; transition: all 0.15s;
     }
@@ -102,68 +119,29 @@
     .urgency-btn:hover { border-color: #555; color: #ccc; }
 
     textarea {
-      width: 100%; min-height: 120px; max-height: 200px;
+      width: 100%; min-height: 100px; max-height: 180px;
       background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 10px;
-      padding: 0.8rem; color: #e0e0e0; font-size: 1rem; resize: vertical;
+      padding: 0.7rem; color: #e0e0e0; font-size: 1rem; resize: vertical;
       outline: none; font-family: inherit; line-height: 1.5; transition: border-color 0.2s;
     }
     textarea:focus { border-color: #7c3aed; }
     textarea::placeholder { color: #555; }
 
-    .char-count { font-size: 0.75rem; color: #555; text-align: right; }
+    .char-count { font-size: 0.72rem; color: #555; text-align: right; }
 
     .btn-row { display: flex; gap: 0.6rem; }
 
     .btn {
-      padding: 0.7rem 1.2rem; border-radius: 10px; font-size: 0.9rem;
+      padding: 0.65rem 1rem; border-radius: 10px; font-size: 0.88rem;
       cursor: pointer; border: none; font-weight: 600; transition: all 0.2s;
     }
     .btn-primary {
-      flex: 1; background: linear-gradient(135deg, #7c3aed, #5b21b6);
-      color: #fff;
+      flex: 1; background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #fff;
     }
     .btn-primary:hover { background: linear-gradient(135deg, #8b5cf6, #6d28d9); transform: translateY(-1px); }
-    .btn-secondary {
-      background: #1e1e3a; border: 1px solid #333; color: #888;
-    }
+    .btn-secondary { background: #1e1e3a; border: 1px solid #333; color: #888; }
     .btn-secondary:hover { border-color: #555; color: #ccc; }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
-
-    /* ── Timer ── */
-    .timer-section { display: flex; flex-direction: column; gap: 0.8rem; }
-
-    .timer-presets { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-    .preset-btn {
-      padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.82rem;
-      cursor: pointer; border: 1px solid #2a2a4a; background: transparent;
-      color: #888; transition: all 0.15s;
-    }
-    .preset-btn:hover { border-color: #7c3aed; color: #a78bfa; }
-
-    .timer-custom {
-      display: flex; gap: 0.5rem; align-items: center;
-    }
-    .timer-custom input[type="number"] {
-      width: 65px; background: #0f0f1a; border: 1px solid #2a2a4a;
-      border-radius: 8px; padding: 0.5rem; color: #e0e0e0; font-size: 1rem;
-      text-align: center; outline: none;
-    }
-    .timer-custom input:focus { border-color: #7c3aed; }
-    .timer-custom span { color: #666; font-size: 0.85rem; }
-
-    .timer-display-large {
-      font-size: 2.5rem; font-weight: 700; text-align: center;
-      font-variant-numeric: tabular-nums; color: #a78bfa;
-      padding: 0.5rem; letter-spacing: 2px;
-    }
-    .timer-display-large.warning { color: #fbbf24; }
-    .timer-display-large.danger  { color: #f87171; animation: blink 0.8s step-end infinite; }
-
-    @keyframes blink { 50% { opacity: 0.3; } }
-
-    .timer-controls { display: flex; gap: 0.5rem; }
-    .timer-controls .btn { flex: 1; font-size: 0.85rem; padding: 0.55rem; }
-
     .btn-green  { background: #14532d; border: 1px solid #16a34a; color: #4ade80; }
     .btn-green:hover  { background: #166534; }
     .btn-yellow { background: #451a03; border: 1px solid #d97706; color: #fbbf24; }
@@ -171,10 +149,37 @@
     .btn-red    { background: #450a0a; border: 1px solid #dc2626; color: #f87171; }
     .btn-red:hover    { background: #7f1d1d; }
 
-    /* ── Display Mode ── */
-    .display-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    /* ── Timer ── */
+    .timer-section { display: flex; flex-direction: column; gap: 0.8rem; }
+    .timer-presets { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .preset-btn {
+      padding: 0.38rem 0.75rem; border-radius: 8px; font-size: 0.8rem;
+      cursor: pointer; border: 1px solid #2a2a4a; background: transparent;
+      color: #888; transition: all 0.15s;
+    }
+    .preset-btn:hover { border-color: #7c3aed; color: #a78bfa; }
+    .timer-custom { display: flex; gap: 0.5rem; align-items: center; }
+    .timer-custom input[type="number"] {
+      width: 60px; background: #0f0f1a; border: 1px solid #2a2a4a;
+      border-radius: 8px; padding: 0.5rem; color: #e0e0e0; font-size: 1rem;
+      text-align: center; outline: none;
+    }
+    .timer-custom input:focus { border-color: #7c3aed; }
+    .timer-custom span { color: #666; font-size: 0.85rem; }
+    .timer-display-large {
+      font-size: 2.4rem; font-weight: 700; text-align: center;
+      font-variant-numeric: tabular-nums; color: #a78bfa; letter-spacing: 2px;
+    }
+    .timer-display-large.warning { color: #fbbf24; }
+    .timer-display-large.danger  { color: #f87171; animation: blink 0.8s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0.3; } }
+    .timer-controls { display: flex; gap: 0.5rem; }
+    .timer-controls .btn { flex: 1; font-size: 0.82rem; padding: 0.5rem; }
+
+    /* ── Display mode ── */
+    .display-options { display: flex; flex-direction: column; gap: 0.45rem; }
     .display-btn {
-      padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem;
+      padding: 0.55rem 0.9rem; border-radius: 8px; font-size: 0.83rem;
       cursor: pointer; border: 1px solid #2a2a4a; background: transparent;
       color: #888; transition: all 0.15s; text-align: left; display: flex;
       align-items: center; gap: 0.6rem;
@@ -183,67 +188,90 @@
     .display-btn.active { background: #1e1040; border-color: #5b21b6; color: #a78bfa; }
 
     /* ── History ── */
-    .history-list {
-      display: flex; flex-direction: column; gap: 0.5rem;
-      max-height: 200px; overflow-y: auto;
-    }
+    .history-list { display: flex; flex-direction: column; gap: 0.4rem; max-height: 160px; overflow-y: auto; }
     .history-item {
       background: #0f0f1a; border: 1px solid #222; border-radius: 8px;
-      padding: 0.6rem 0.8rem; font-size: 0.85rem; color: #aaa;
-      cursor: pointer; transition: all 0.15s;
-      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.7rem; font-size: 0.82rem; color: #aaa;
+      cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 0.45rem;
     }
     .history-item:hover { border-color: #444; color: #e0e0e0; }
-    .history-badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; flex-shrink: 0; }
+    .history-badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 10px; flex-shrink: 0; }
     .badge-normal  { background: #14532d; color: #4ade80; }
     .badge-caution { background: #451a03; color: #fbbf24; }
     .badge-urgent  { background: #450a0a; color: #f87171; }
+    .badge-section { background: #0f1f2a; color: #60a5fa; border: 1px solid #1d4ed8; }
     .history-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    /* ── Right sidebar ── */
-    .sidebar {
-      display: flex; flex-direction: column; gap: 1rem;
-    }
+    /* ── Sidebar ── */
+    .sidebar { display: flex; flex-direction: column; gap: 0.9rem; }
 
-    /* ── Presenter count ── */
-    .presenter-info {
+    /* ── Section panel ── */
+    .section-header {
       display: flex; align-items: center; justify-content: space-between;
     }
-    .count-badge {
-      background: #1e1040; color: #a78bfa; font-weight: 700;
-      font-size: 1.4rem; padding: 0.2rem 0.8rem; border-radius: 8px;
+    .section-list { display: flex; flex-direction: column; gap: 0.45rem; }
+    .section-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: #0f0f1a; border: 1px solid #222; border-radius: 10px;
+      padding: 0.6rem 0.8rem; transition: border-color 0.15s;
     }
+    .section-item:hover { border-color: #333; }
+    .section-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+    .section-dot.empty { background: #444; }
+    .section-info { flex: 1; min-width: 0; }
+    .section-name { font-size: 0.88rem; font-weight: 600; color: #e0e0e0;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .section-count { font-size: 0.72rem; color: #666; }
+    .section-actions { display: flex; gap: 0.3rem; }
+    .icon-btn {
+      background: transparent; border: 1px solid #2a2a4a; border-radius: 6px;
+      padding: 0.25rem 0.45rem; font-size: 0.75rem; cursor: pointer; color: #666;
+      transition: all 0.15s;
+    }
+    .icon-btn:hover { border-color: #555; color: #ccc; }
+    .icon-btn.del:hover { border-color: #dc2626; color: #f87171; }
+
+    .add-section-row { display: flex; gap: 0.4rem; }
+    .add-section-row input {
+      flex: 1; background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 8px;
+      padding: 0.45rem 0.7rem; color: #e0e0e0; font-size: 0.83rem; outline: none;
+    }
+    .add-section-row input:focus { border-color: #7c3aed; }
+    .add-section-row input::placeholder { color: #444; }
+
+    .btn-add-section {
+      background: #1e1040; border: 1px solid #5b21b6; border-radius: 8px;
+      padding: 0.45rem 0.75rem; color: #a78bfa; font-size: 0.82rem; cursor: pointer;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .btn-add-section:hover { background: #2d1b5e; }
 
     /* ── Preview ── */
     .preview-box {
       background: #0a0a15; border: 1px solid #1a1a3a; border-radius: 10px;
-      min-height: 80px; padding: 1rem; display: flex; align-items: center;
+      min-height: 70px; padding: 0.9rem; display: flex; align-items: center;
       justify-content: center; text-align: center;
     }
-    .preview-text { font-size: 1rem; font-weight: 600; }
+    .preview-text { font-size: 0.95rem; font-weight: 600; }
     .preview-text.normal  { color: #e0e0e0; }
     .preview-text.caution { color: #fbbf24; }
     .preview-text.urgent  { color: #f87171; }
     .preview-empty { color: #333; font-size: 0.8rem; }
 
-    /* ── Notifications ── */
+    /* ── Toast ── */
     .toast {
       position: fixed; bottom: 1.5rem; right: 1.5rem;
       background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 10px;
-      padding: 0.8rem 1.2rem; font-size: 0.9rem; color: #e0e0e0;
+      padding: 0.75rem 1.1rem; font-size: 0.88rem; color: #e0e0e0;
       opacity: 0; transform: translateY(10px); transition: all 0.3s;
       pointer-events: none; z-index: 1000;
     }
     .toast.show { opacity: 1; transform: translateY(0); }
 
-    /* scrollbar */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 3px; }
 
-    @media (max-width: 700px) {
-      .layout { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -267,10 +295,10 @@
 <div class="layout">
 
   <!-- Left main panel -->
-  <div style="display:flex;flex-direction:column;gap:1rem;">
+  <div style="display:flex;flex-direction:column;gap:0.9rem;">
 
     <!-- Tabs -->
-    <div class="panel" style="padding:0.8rem 1.2rem;gap:0.6rem;">
+    <div class="panel" style="padding:0.7rem 1rem;gap:0;">
       <div class="tabs">
         <button class="tab active" onclick="switchTab('message')">✉️ 메시지</button>
         <button class="tab" onclick="switchTab('timer')">⏱️ 타이머</button>
@@ -282,12 +310,20 @@
     <div class="panel" id="tab-message">
       <div class="panel-title">메시지 보내기</div>
 
+      <!-- Target selector -->
       <div>
-        <div class="urgency-row">
-          <button class="urgency-btn active-normal" id="urgNormal"  onclick="setUrgency('normal')">🟢 일반</button>
-          <button class="urgency-btn" id="urgCaution" onclick="setUrgency('caution')">🟡 주의</button>
-          <button class="urgency-btn" id="urgUrgent"  onclick="setUrgency('urgent')">🔴 긴급</button>
+        <div class="panel-title" style="margin-bottom:0.4rem;">전송 대상</div>
+        <div class="target-row" id="targetRow">
+          <button class="target-chip active-all" id="chip-all" onclick="setTarget('all')">📢 전체</button>
+          <span class="target-chip-empty" id="targetEmpty">← 분과를 먼저 추가하세요</span>
         </div>
+      </div>
+
+      <!-- Urgency -->
+      <div class="urgency-row">
+        <button class="urgency-btn active-normal" id="urgNormal"  onclick="setUrgency('normal')">🟢 일반</button>
+        <button class="urgency-btn" id="urgCaution" onclick="setUrgency('caution')">🟡 주의</button>
+        <button class="urgency-btn" id="urgUrgent"  onclick="setUrgency('urgent')">🔴 긴급</button>
       </div>
 
       <div class="msg-form">
@@ -297,23 +333,22 @@
 
         <div class="btn-row">
           <button class="btn btn-primary" onclick="sendMessage()">전송 ↵</button>
-          <button class="btn btn-secondary" onclick="clearMessage()">메시지 지우기</button>
+          <button class="btn btn-secondary" onclick="clearMessage()">지우기</button>
         </div>
       </div>
 
       <!-- History -->
       <div>
-        <div class="panel-title" style="margin-bottom:0.6rem;">최근 메시지</div>
+        <div class="panel-title" style="margin-bottom:0.5rem;">최근 메시지</div>
         <div class="history-list" id="historyList">
-          <div style="color:#333;font-size:0.8rem;text-align:center;padding:0.5rem;">아직 보낸 메시지가 없습니다</div>
+          <div style="color:#333;font-size:0.78rem;text-align:center;padding:0.4rem;">아직 보낸 메시지가 없습니다</div>
         </div>
       </div>
     </div>
 
     <!-- Timer Tab -->
     <div class="panel" id="tab-timer" style="display:none;">
-      <div class="panel-title">타이머 제어</div>
-
+      <div class="panel-title">타이머 제어 (전체 공유)</div>
       <div class="timer-section">
         <div>
           <div class="panel-title" style="margin-bottom:0.5rem;">빠른 설정</div>
@@ -327,7 +362,6 @@
             <button class="preset-btn" onclick="setTimerPreset(60)">60분</button>
           </div>
         </div>
-
         <div>
           <div class="panel-title" style="margin-bottom:0.5rem;">직접 입력</div>
           <div class="timer-custom">
@@ -335,12 +369,10 @@
             <span>분</span>
             <input type="number" id="customSec" min="0" max="59" value="0" placeholder="초" />
             <span>초</span>
-            <button class="btn btn-secondary" style="font-size:0.8rem;padding:0.5rem 0.8rem;" onclick="setCustomTimer()">설정</button>
+            <button class="btn btn-secondary" style="font-size:0.78rem;padding:0.45rem 0.7rem;" onclick="setCustomTimer()">설정</button>
           </div>
         </div>
-
         <div class="timer-display-large" id="timerDisplay">00:00</div>
-
         <div class="timer-controls">
           <button class="btn btn-green"  onclick="startTimer()">▶ 시작</button>
           <button class="btn btn-yellow" onclick="pauseTimer()">⏸ 일시정지</button>
@@ -352,29 +384,20 @@
     <!-- Display Tab -->
     <div class="panel" id="tab-display" style="display:none;">
       <div class="panel-title">발표자 화면 표시 설정</div>
-
       <div class="display-options">
-        <button class="display-btn active" id="dm-both" onclick="setDisplayMode('both')">
-          <span>📋</span> 메시지 + 타이머 (기본)
-        </button>
-        <button class="display-btn" id="dm-message" onclick="setDisplayMode('message')">
-          <span>✉️</span> 메시지만 표시
-        </button>
-        <button class="display-btn" id="dm-timer" onclick="setDisplayMode('timer')">
-          <span>⏱️</span> 타이머만 표시
-        </button>
-        <button class="display-btn" id="dm-clock" onclick="setDisplayMode('clock')">
-          <span>🕐</span> 현재 시각 표시
-        </button>
+        <button class="display-btn active" id="dm-both"    onclick="setDisplayMode('both')">    <span>📋</span> 메시지 + 타이머 (기본)</button>
+        <button class="display-btn"        id="dm-message" onclick="setDisplayMode('message')"> <span>✉️</span> 메시지만 표시</button>
+        <button class="display-btn"        id="dm-timer"   onclick="setDisplayMode('timer')">   <span>⏱️</span> 타이머만 표시</button>
+        <button class="display-btn"        id="dm-clock"   onclick="setDisplayMode('clock')">   <span>🕐</span> 현재 시각 표시</button>
       </div>
 
-      <div style="padding-top:0.5rem; border-top: 1px solid #2a2a4a;">
-        <div class="panel-title" style="margin-bottom:0.6rem;">발표자 화면 링크</div>
-        <div style="display:flex;gap:0.5rem;">
-          <input type="text" id="presenterLink" readonly style="flex:1;font-size:0.8rem;color:#888;" />
-          <button class="btn btn-secondary" style="font-size:0.8rem;padding:0.5rem 0.8rem;" onclick="copyLink()">복사</button>
+      <div style="border-top:1px solid #2a2a4a;padding-top:0.7rem;">
+        <div class="panel-title" style="margin-bottom:0.5rem;">발표자 링크 공유</div>
+        <div style="display:flex;gap:0.4rem;margin-bottom:0.4rem;">
+          <input type="text" id="presenterLink" readonly style="flex:1;font-size:0.78rem;color:#888;background:#0f0f1a;border:1px solid #2a2a4a;border-radius:8px;padding:0.45rem 0.7rem;outline:none;" />
+          <button class="btn btn-secondary" style="font-size:0.78rem;padding:0.45rem 0.7rem;" onclick="copyLink('presenterLink')">복사</button>
         </div>
-        <p style="font-size:0.75rem;color:#555;margin-top:0.4rem;">발표자에게 이 링크를 공유하세요</p>
+        <div id="sectionLinks" style="display:flex;flex-direction:column;gap:0.4rem;"></div>
       </div>
     </div>
 
@@ -383,18 +406,29 @@
   <!-- Right Sidebar -->
   <div class="sidebar">
 
-    <!-- Status -->
+    <!-- Section management -->
     <div class="panel">
-      <div class="panel-title">연결 상태</div>
-      <div class="presenter-info">
-        <span style="font-size:0.9rem;color:#888;">접속 중인 발표자</span>
-        <span class="count-badge" id="presenterCount">0</span>
+      <div class="section-header">
+        <div class="panel-title">분과 관리</div>
+        <span id="totalPresenterBadge" style="font-size:0.78rem;color:#666;">총 0명</span>
+      </div>
+
+      <div class="section-list" id="sectionList">
+        <div style="color:#333;font-size:0.78rem;text-align:center;padding:0.4rem;">
+          아직 분과가 없습니다
+        </div>
+      </div>
+
+      <div class="add-section-row">
+        <input type="text" id="newSectionName" placeholder="분과 이름 입력" maxlength="20"
+          onkeydown="if(event.key==='Enter') addSection()" />
+        <button class="btn-add-section" onclick="addSection()">+ 추가</button>
       </div>
     </div>
 
     <!-- Preview -->
     <div class="panel">
-      <div class="panel-title" style="margin-bottom:0.6rem;">발표자 화면 미리보기</div>
+      <div class="panel-title" style="margin-bottom:0.3rem;">발표자 화면 미리보기</div>
       <div class="preview-box" id="previewBox">
         <span class="preview-empty">전송된 메시지 없음</span>
       </div>
@@ -402,8 +436,8 @@
 
     <!-- Quick messages -->
     <div class="panel">
-      <div class="panel-title" style="margin-bottom:0.6rem;">빠른 메시지</div>
-      <div style="display:flex;flex-direction:column;gap:0.4rem;">
+      <div class="panel-title" style="margin-bottom:0.4rem;">빠른 메시지</div>
+      <div style="display:flex;flex-direction:column;gap:0.35rem;">
         <button class="display-btn" onclick="quickMsg('남은 시간 5분입니다')">⏰ 남은 시간 5분</button>
         <button class="display-btn" onclick="quickMsg('속도를 조금 올려주세요')">🚀 속도 업</button>
         <button class="display-btn" onclick="quickMsg('속도를 조금 줄여주세요')">🐢 속도 다운</button>
@@ -420,17 +454,21 @@
 
 <script>
   // ── State ──
-  const params   = new URLSearchParams(location.search);
-  const SESSION  = params.get('room') || params.get('session') || 'default';
+  const params    = new URLSearchParams(location.search);
+  const SESSION   = params.get('room') || params.get('session') || 'default';
   const ROOM_NAME = params.get('name') || SESSION;
-  let ws, urgency = 'normal', timerSeconds = 0, timerRunning = false, timerInterval;
+
+  let ws;
+  let urgency     = 'normal';
+  let targetId    = 'all';      // 'all' | sectionId
+  let sections    = [];         // [{ id, name, presenterCount }]
+  let timerSeconds = 0, timerRunning = false, timerInterval;
   let displayMode = 'both';
-  const history = [];
+  const history   = [];
 
   document.getElementById('sessionCodeDisplay').textContent = SESSION;
-  document.getElementById('roomNameDisplay').textContent = ROOM_NAME;
+  document.getElementById('roomNameDisplay').textContent    = ROOM_NAME;
 
-  // Presenter link
   const presLink = `${location.origin}/presenter?room=${encodeURIComponent(SESSION)}&name=${encodeURIComponent(ROOM_NAME)}`;
   document.getElementById('presenterLink').value = presLink;
 
@@ -446,21 +484,28 @@
 
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
-      if (msg.type === 'presenter_count') {
-        document.getElementById('presenterCount').textContent = msg.payload.count;
+      switch (msg.type) {
+        case 'joined':
+          sections = msg.payload.sections || [];
+          renderSections();
+          break;
+        case 'sections_update':
+          sections = msg.payload.sections || [];
+          renderSections();
+          break;
+        case 'kicked':
+          alert(msg.payload.reason);
+          location.href = '/';
+          break;
       }
     };
 
-    ws.onclose = () => {
-      setStatus(false);
-      setTimeout(connect, 3000);
-    };
-
+    ws.onclose = () => { setStatus(false); setTimeout(connect, 3000); };
     ws.onerror = () => ws.close();
   }
 
   function setStatus(online) {
-    document.getElementById('statusDot').className  = 'status-dot' + (online ? '' : ' offline');
+    document.getElementById('statusDot').className   = 'status-dot' + (online ? '' : ' offline');
     document.getElementById('statusText').textContent = online ? '연결됨' : '연결 끊김';
   }
 
@@ -478,6 +523,107 @@
     });
   }
 
+  // ── Sections ──
+  function addSection() {
+    const input = document.getElementById('newSectionName');
+    const name  = input.value.trim();
+    if (!name) return;
+    const sid = 'sec-' + Date.now();
+    send({ type: 'create_section', payload: { sectionId: sid, sectionName: name } });
+    input.value = '';
+    showToast(`분과 "${name}" 추가됨`);
+  }
+
+  function deleteSection(sectionId, sectionName) {
+    if (!confirm(`"${sectionName}" 분과를 삭제하시겠습니까?\n해당 분과의 발표자 화면 연결이 끊어집니다.`)) return;
+    send({ type: 'delete_section', payload: { sectionId } });
+    // If target was this section, reset to 'all'
+    if (targetId === sectionId) setTarget('all');
+    showToast(`분과 "${sectionName}" 삭제됨`);
+  }
+
+  function renameSection(sectionId, currentName) {
+    const newName = prompt(`분과 이름 변경 (현재: ${currentName})`, currentName);
+    if (!newName || newName.trim() === currentName) return;
+    send({ type: 'rename_section', payload: { sectionId, sectionName: newName.trim() } });
+  }
+
+  function renderSections() {
+    const list   = document.getElementById('sectionList');
+    const total  = sections.reduce((sum, s) => sum + s.presenterCount, 0);
+    document.getElementById('totalPresenterBadge').textContent = `총 ${total}명`;
+
+    if (sections.length === 0) {
+      list.innerHTML = '<div style="color:#333;font-size:0.78rem;text-align:center;padding:0.4rem;">아직 분과가 없습니다</div>';
+      document.getElementById('targetEmpty').style.display = '';
+      renderTargetChips();
+      renderSectionLinks();
+      return;
+    }
+
+    document.getElementById('targetEmpty').style.display = 'none';
+
+    list.innerHTML = sections.map(s => `
+      <div class="section-item">
+        <div class="section-dot ${s.presenterCount === 0 ? 'empty' : ''}"></div>
+        <div class="section-info">
+          <div class="section-name">${escHtml(s.name)}</div>
+          <div class="section-count">발표자 ${s.presenterCount}명</div>
+        </div>
+        <div class="section-actions">
+          <button class="icon-btn" onclick="renameSection('${escAttr(s.id)}','${escAttr(s.name)}')" title="이름 변경">✏️</button>
+          <button class="icon-btn del" onclick="deleteSection('${escAttr(s.id)}','${escAttr(s.name)}')" title="삭제">✕</button>
+        </div>
+      </div>
+    `).join('');
+
+    renderTargetChips();
+    renderSectionLinks();
+  }
+
+  function renderTargetChips() {
+    const row = document.getElementById('targetRow');
+    // Keep the 전체 chip and empty hint, rebuild section chips
+    const existing = row.querySelectorAll('.target-chip:not(#chip-all)');
+    existing.forEach(el => el.remove());
+
+    sections.forEach(s => {
+      const chip = document.createElement('button');
+      chip.className = 'target-chip' + (targetId === s.id ? ' active-section' : '');
+      chip.textContent = s.name;
+      chip.onclick = () => setTarget(s.id);
+      row.appendChild(chip);
+    });
+
+    // Update 전체 chip state
+    document.getElementById('chip-all').className = 'target-chip' + (targetId === 'all' ? ' active-all' : '');
+  }
+
+  function renderSectionLinks() {
+    const box = document.getElementById('sectionLinks');
+    box.innerHTML = sections.map(s => {
+      const link = `${location.origin}/presenter?room=${encodeURIComponent(SESSION)}&name=${encodeURIComponent(ROOM_NAME)}&section=${encodeURIComponent(s.id)}&sectionName=${encodeURIComponent(s.name)}`;
+      return `
+        <div style="display:flex;gap:0.4rem;align-items:center;">
+          <span style="font-size:0.72rem;color:#666;white-space:nowrap;">${escHtml(s.name)}</span>
+          <input type="text" value="${escHtml(link)}" readonly id="link-${escAttr(s.id)}"
+            style="flex:1;font-size:0.72rem;color:#666;background:#0f0f1a;border:1px solid #1a1a3a;border-radius:6px;padding:0.3rem 0.5rem;outline:none;" />
+          <button class="btn btn-secondary" style="font-size:0.72rem;padding:0.3rem 0.5rem;"
+            onclick="copyLink('link-${escAttr(s.id)}')">복사</button>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Target ──
+  function setTarget(id) {
+    targetId = id;
+    // Update all chips
+    document.getElementById('chip-all').className = 'target-chip' + (id === 'all' ? ' active-all' : '');
+    document.querySelectorAll('.target-chip:not(#chip-all)').forEach((chip, i) => {
+      chip.className = 'target-chip' + (sections[i] && sections[i].id === id ? ' active-section' : '');
+    });
+  }
+
   // ── Urgency ──
   function setUrgency(level) {
     urgency = level;
@@ -488,8 +634,7 @@
 
   // ── Message ──
   function updateCharCount() {
-    const len = document.getElementById('msgInput').value.length;
-    document.getElementById('charCount').textContent = len;
+    document.getElementById('charCount').textContent = document.getElementById('msgInput').value.length;
   }
 
   function handleMsgKey(e) {
@@ -499,19 +644,21 @@
   function sendMessage() {
     const text = document.getElementById('msgInput').value.trim();
     if (!text) return;
-    const payload = { text, urgency, timestamp: Date.now() };
+    const targetName = targetId === 'all' ? '전체' : (sections.find(s => s.id === targetId)?.name || targetId);
+    const payload = { text, urgency, target: targetId, targetName, timestamp: Date.now() };
     send({ type: 'message', payload });
     addHistory(payload);
     updatePreview(text, urgency);
-    showToast('메시지를 전송했습니다');
+    const label = targetId === 'all' ? '전체에게' : `[${targetName}]에게`;
+    showToast(`${label} 메시지 전송`);
   }
 
   function clearMessage() {
-    send({ type: 'clear_message' });
+    send({ type: 'clear_message', payload: { target: targetId } });
     updatePreview(null, null);
     document.getElementById('msgInput').value = '';
     updateCharCount();
-    showToast('메시지를 지웠습니다');
+    showToast('메시지 지움');
   }
 
   function quickMsg(text) {
@@ -528,13 +675,14 @@
 
   function renderHistory() {
     const list = document.getElementById('historyList');
-    if (history.length === 0) {
-      list.innerHTML = '<div style="color:#333;font-size:0.8rem;text-align:center;padding:0.5rem;">아직 보낸 메시지가 없습니다</div>';
+    if (!history.length) {
+      list.innerHTML = '<div style="color:#333;font-size:0.78rem;text-align:center;padding:0.4rem;">아직 보낸 메시지가 없습니다</div>';
       return;
     }
     list.innerHTML = history.map(h => `
-      <div class="history-item" onclick="reuseMsg('${h.text.replace(/'/g, "\\'")}', '${h.urgency}')">
+      <div class="history-item" onclick="reuseMsg('${escAttr(h.text)}', '${h.urgency}')">
         <span class="history-badge badge-${h.urgency}">${{normal:'일반',caution:'주의',urgent:'긴급'}[h.urgency]}</span>
+        ${h.targetName !== '전체' ? `<span class="history-badge badge-section">${escHtml(h.targetName)}</span>` : ''}
         <span class="history-text">${escHtml(h.text)}</span>
       </div>
     `).join('');
@@ -546,17 +694,10 @@
     updateCharCount();
   }
 
-  function escHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
   // ── Preview ──
   function updatePreview(text, urg) {
     const box = document.getElementById('previewBox');
-    if (!text) {
-      box.innerHTML = '<span class="preview-empty">전송된 메시지 없음</span>';
-      return;
-    }
+    if (!text) { box.innerHTML = '<span class="preview-empty">전송된 메시지 없음</span>'; return; }
     box.innerHTML = `<span class="preview-text ${urg}">${escHtml(text)}</span>`;
   }
 
@@ -580,13 +721,13 @@
   function startTimer() {
     if (timerSeconds <= 0) return;
     timerRunning = true;
-    const startedAt = Date.now();
+    const startedAt   = Date.now();
     const initialSecs = timerSeconds;
     send({ type: 'timer', payload: { seconds: initialSecs, running: true, startedAt } });
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-      timerSeconds = Math.max(0, initialSecs - elapsed);
+      timerSeconds  = Math.max(0, initialSecs - elapsed);
       renderTimer();
       if (timerSeconds <= 0) { clearInterval(timerInterval); timerRunning = false; }
     }, 250);
@@ -600,15 +741,15 @@
 
   function stopTimer() {
     clearInterval(timerInterval);
-    timerRunning = false;
-    timerSeconds = 0;
+    timerRunning  = false;
+    timerSeconds  = 0;
     renderTimer();
     send({ type: 'clear_timer' });
   }
 
   function renderTimer() {
-    const m = Math.floor(timerSeconds / 60);
-    const s = timerSeconds % 60;
+    const m  = Math.floor(timerSeconds / 60);
+    const s  = timerSeconds % 60;
     const el = document.getElementById('timerDisplay');
     el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     el.className = 'timer-display-large';
@@ -622,19 +763,27 @@
     ['both','message','timer','clock'].forEach(m => {
       document.getElementById(`dm-${m}`).classList.toggle('active', m === mode);
     });
-    send({ type: 'display_mode', payload: { mode } });
+    send({ type: 'display_mode', payload: { mode, target: targetId } });
   }
 
   // ── Utils ──
-  function copyLink() {
-    navigator.clipboard.writeText(presLink).then(() => showToast('링크가 복사되었습니다'));
+  function copyLink(inputId) {
+    const el = document.getElementById(inputId);
+    navigator.clipboard.writeText(el.value).then(() => showToast('링크 복사됨'));
   }
 
   function showToast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function escAttr(s) {
+    return String(s).replace(/'/g,"\\'").replace(/"/g,'\\"');
   }
 
   connect();

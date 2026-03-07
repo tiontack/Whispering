@@ -17,32 +17,114 @@
       overflow: hidden;
     }
 
+    /* ── Section picker overlay ── */
+    .picker-overlay {
+      position: fixed; inset: 0; background: #050510;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 200; padding: 2rem;
+    }
+    .picker-overlay.hidden { display: none; }
+
+    .picker-logo {
+      font-size: 2rem; font-weight: 800; margin-bottom: 0.3rem;
+      background: linear-gradient(135deg, #7c3aed, #a78bfa, #60a5fa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .picker-subtitle { color: #555; font-size: 0.9rem; margin-bottom: 2.5rem; }
+
+    .picker-card {
+      background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 18px;
+      padding: 2rem; width: 100%; max-width: 460px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+
+    .picker-room-info {
+      display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem;
+      padding-bottom: 1rem; border-bottom: 1px solid #2a2a4a;
+    }
+    .picker-room-name { font-size: 1rem; font-weight: 700; }
+    .picker-room-code { font-size: 0.78rem; color: #a78bfa; background: #1e1040;
+      padding: 0.2rem 0.6rem; border-radius: 12px; }
+
+    .picker-section-title { font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 0.12em; color: #555; font-weight: 700; margin-bottom: 0.8rem; }
+
+    .section-options { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.2rem; }
+    .section-option {
+      display: flex; align-items: center; gap: 0.8rem;
+      background: #0f0f1a; border: 2px solid #2a2a4a; border-radius: 12px;
+      padding: 0.9rem 1rem; cursor: pointer; transition: all 0.18s;
+    }
+    .section-option:hover { border-color: #5b21b6; background: #1a1a35; }
+    .section-option.selected { border-color: #7c3aed; background: #1e1040; }
+    .section-option-dot { width: 10px; height: 10px; border-radius: 50%;
+      background: #22c55e; flex-shrink: 0; }
+    .section-option-dot.empty { background: #444; }
+    .section-option-info { flex: 1; }
+    .section-option-name { font-size: 0.95rem; font-weight: 600; }
+    .section-option-count { font-size: 0.72rem; color: #666; }
+    .section-option-check { color: #7c3aed; font-size: 1.1rem; }
+
+    .picker-divider {
+      text-align: center; color: #333; font-size: 0.75rem; margin: 0.8rem 0;
+      position: relative;
+    }
+    .picker-divider::before, .picker-divider::after {
+      content: ''; position: absolute; top: 50%; width: 44%; height: 1px; background: #1a1a3a;
+    }
+    .picker-divider::before { left: 0; }
+    .picker-divider::after  { right: 0; }
+
+    .new-section-row { display: flex; gap: 0.5rem; margin-bottom: 1.2rem; }
+    .new-section-row input {
+      flex: 1; background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 10px;
+      padding: 0.65rem 0.9rem; color: #e0e0e0; font-size: 0.9rem; outline: none;
+    }
+    .new-section-row input:focus { border-color: #7c3aed; }
+    .new-section-row input::placeholder { color: #444; }
+    .btn-new-section {
+      background: #1e1040; border: 1px solid #5b21b6; border-radius: 10px;
+      padding: 0.65rem 1rem; color: #a78bfa; font-size: 0.85rem; cursor: pointer;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .btn-new-section:hover { background: #2d1b5e; }
+
+    .btn-enter {
+      width: 100%; padding: 0.85rem; border-radius: 12px; font-size: 1rem;
+      font-weight: 700; cursor: pointer; border: none;
+      background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #fff;
+      transition: all 0.2s;
+    }
+    .btn-enter:hover { background: linear-gradient(135deg, #8b5cf6, #6d28d9); transform: translateY(-1px); }
+    .btn-enter:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    .picker-loading { text-align: center; color: #444; font-size: 0.85rem; padding: 1rem; }
+
     /* ── Top bar ── */
     .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       padding: 0.6rem 1.2rem;
       background: rgba(10,10,25,0.95);
       border-bottom: 1px solid #1a1a3a;
-      flex-shrink: 0;
-      z-index: 10;
-      transition: opacity 0.5s;
+      flex-shrink: 0; z-index: 10; transition: opacity 0.5s;
     }
-
     .topbar.hidden { opacity: 0; pointer-events: none; }
 
     .logo { font-size: 1.1rem; font-weight: 800;
       background: linear-gradient(135deg, #7c3aed, #a78bfa);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
+    .section-tag {
+      font-size: 0.72rem; color: #fff; font-weight: 600;
+      background: #1e1040; border: 1px solid #5b21b6;
+      padding: 0.2rem 0.65rem; border-radius: 12px;
+    }
+
     .top-right { display: flex; align-items: center; gap: 0.8rem; }
     .session-tag { font-size: 0.8rem; color: #666; }
     .session-val { font-size: 0.82rem; color: #a78bfa; font-weight: 600; }
-
     .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
     .conn-dot.offline { background: #ef4444; }
-
     .btn-fs {
       background: #1a1a3a; border: 1px solid #2a2a4a; border-radius: 8px;
       padding: 0.35rem 0.7rem; color: #888; cursor: pointer; font-size: 0.8rem;
@@ -52,194 +134,129 @@
 
     /* ── Main stage ── */
     .stage {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-      gap: 2rem;
-      position: relative;
-      min-height: 0;
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 2rem; gap: 2rem;
+      position: relative; min-height: 0;
     }
 
-    /* ── Clock (always visible, small) ── */
     .clock-widget {
-      position: absolute;
-      top: 1.2rem;
-      right: 1.5rem;
-      font-size: 1rem;
-      color: #555;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.05em;
+      position: absolute; top: 1.2rem; right: 1.5rem;
+      font-size: 1rem; color: #555; font-variant-numeric: tabular-nums;
     }
 
-    /* ── Main display ── */
+    .section-badge-stage {
+      position: absolute; top: 1.2rem; left: 1.5rem;
+      font-size: 0.78rem; color: #a78bfa; font-weight: 600;
+      background: rgba(30,16,64,0.8); border: 1px solid #3b21b6;
+      padding: 0.25rem 0.7rem; border-radius: 12px;
+    }
+
     .main-display {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2rem;
-      width: 100%;
-      max-width: 900px;
-      transition: all 0.4s ease;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 2rem; width: 100%; max-width: 900px; transition: all 0.4s ease;
     }
 
     /* ── Message card ── */
     .message-card {
-      width: 100%;
-      border-radius: 20px;
-      padding: 2.5rem 3rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      transition: all 0.4s ease;
-      position: relative;
-      overflow: hidden;
+      width: 100%; border-radius: 20px; padding: 2.5rem 3rem;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 1rem; position: relative; overflow: hidden;
     }
-
-    .message-card.normal {
-      background: linear-gradient(135deg, #1a1a35, #1e1e4a);
-      border: 2px solid #3b3b7a;
-      box-shadow: 0 0 40px rgba(100, 100, 255, 0.1);
-    }
-
-    .message-card.caution {
-      background: linear-gradient(135deg, #2a1a00, #3a2200);
-      border: 2px solid #d97706;
-      box-shadow: 0 0 40px rgba(217, 119, 6, 0.2);
-    }
-
-    .message-card.urgent {
-      background: linear-gradient(135deg, #2a0000, #3a0000);
-      border: 2px solid #dc2626;
-      box-shadow: 0 0 40px rgba(220, 38, 38, 0.3);
-      animation: urgentPulse 2s ease-in-out infinite;
-    }
+    .message-card.normal  { background: linear-gradient(135deg,#1a1a35,#1e1e4a); border: 2px solid #3b3b7a; box-shadow: 0 0 40px rgba(100,100,255,0.1); }
+    .message-card.caution { background: linear-gradient(135deg,#2a1a00,#3a2200); border: 2px solid #d97706; box-shadow: 0 0 40px rgba(217,119,6,0.2); }
+    .message-card.urgent  { background: linear-gradient(135deg,#2a0000,#3a0000); border: 2px solid #dc2626; box-shadow: 0 0 40px rgba(220,38,38,0.3); animation: urgentPulse 2s ease-in-out infinite; }
 
     @keyframes urgentPulse {
-      0%, 100% { box-shadow: 0 0 40px rgba(220, 38, 38, 0.3); }
-      50% { box-shadow: 0 0 80px rgba(220, 38, 38, 0.6); }
+      0%,100% { box-shadow: 0 0 40px rgba(220,38,38,0.3); }
+      50%      { box-shadow: 0 0 80px rgba(220,38,38,0.6); }
     }
 
-    .message-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      font-weight: 600;
-      opacity: 0.6;
-    }
-
-    .message-text {
-      font-size: clamp(1.4rem, 4vw, 2.8rem);
-      font-weight: 700;
-      text-align: center;
-      line-height: 1.3;
-      word-break: keep-all;
-    }
-
+    .message-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 600; opacity: 0.6; }
+    .message-text { font-size: clamp(1.4rem,4vw,2.8rem); font-weight: 700; text-align: center; line-height: 1.3; word-break: keep-all; }
     .message-text.normal  { color: #e0e0ff; }
     .message-text.caution { color: #fbbf24; }
     .message-text.urgent  { color: #f87171; }
+    .message-time { font-size: 0.75rem; opacity: 0.4; }
 
-    .message-time {
-      font-size: 0.75rem;
-      opacity: 0.4;
-    }
-
-    /* ── Timer display ── */
-    .timer-widget {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .timer-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: #555;
-      font-weight: 600;
-    }
-
-    .timer-digits {
-      font-size: clamp(3rem, 12vw, 7rem);
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.05em;
-      color: #a78bfa;
-      transition: color 0.3s;
-    }
-
-    .timer-digits.warning { color: #fbbf24; }
-    .timer-digits.danger  { color: #f87171; animation: blink 0.8s step-end infinite; }
-
-    @keyframes blink { 50% { opacity: 0.2; } }
-
-    /* ── Full clock mode ── */
-    .clock-full {
-      font-size: clamp(4rem, 15vw, 10rem);
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      color: #a78bfa;
-      letter-spacing: 0.05em;
-    }
-
-    .clock-date {
-      font-size: clamp(1rem, 3vw, 1.8rem);
-      color: #555;
-      letter-spacing: 0.1em;
-    }
-
-    /* ── Empty state ── */
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      color: #222;
-    }
-
-    .empty-icon { font-size: 4rem; opacity: 0.3; }
-    .empty-text { font-size: 1rem; color: #2a2a4a; }
-
-    /* ── New message animation ── */
     @keyframes slideIn {
       from { opacity: 0; transform: translateY(-20px) scale(0.97); }
       to   { opacity: 1; transform: translateY(0) scale(1); }
     }
-
     .message-card.animate { animation: slideIn 0.35s ease; }
+
+    /* ── Timer ── */
+    .timer-widget { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+    .timer-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: #555; font-weight: 600; }
+    .timer-digits { font-size: clamp(3rem,12vw,7rem); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; color: #a78bfa; transition: color 0.3s; }
+    .timer-digits.warning { color: #fbbf24; }
+    .timer-digits.danger  { color: #f87171; animation: blink 0.8s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0.2; } }
+
+    /* ── Full clock ── */
+    .clock-full { font-size: clamp(4rem,15vw,10rem); font-weight: 800; font-variant-numeric: tabular-nums; color: #a78bfa; letter-spacing: 0.05em; }
+    .clock-date { font-size: clamp(1rem,3vw,1.8rem); color: #555; letter-spacing: 0.1em; }
+
+    /* ── Empty ── */
+    .empty-state { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .empty-icon { font-size: 4rem; opacity: 0.3; }
+    .empty-text { font-size: 1rem; color: #2a2a4a; }
 
     /* ── Offline banner ── */
     .offline-banner {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: rgba(220, 38, 38, 0.9);
-      color: #fff;
-      text-align: center;
-      padding: 0.6rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      transform: translateY(100%);
-      transition: transform 0.3s;
-      z-index: 100;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(220,38,38,0.9); color: #fff; text-align: center;
+      padding: 0.6rem; font-size: 0.85rem; font-weight: 600;
+      transform: translateY(100%); transition: transform 0.3s; z-index: 100;
     }
-
     .offline-banner.show { transform: translateY(0); }
 
-    /* ── Fullscreen hide cursor ── */
+    /* ── Section deleted notice ── */
+    .notice-banner {
+      position: fixed; top: 1rem; left: 50%; transform: translateX(-50%);
+      background: #451a03; border: 1px solid #d97706; color: #fbbf24;
+      padding: 0.7rem 1.4rem; border-radius: 12px; font-size: 0.88rem; font-weight: 600;
+      z-index: 300; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    }
+    .notice-banner.show { opacity: 1; }
+
     body.hide-cursor * { cursor: none !important; }
   </style>
 </head>
 <body>
 
+<!-- ── Section picker overlay ── -->
+<div class="picker-overlay" id="pickerOverlay">
+  <div class="picker-logo">Whispering</div>
+  <p class="picker-subtitle">분과를 선택하고 입장하세요</p>
+
+  <div class="picker-card">
+    <div class="picker-room-info">
+      <span class="picker-room-name" id="pickerRoomName">—</span>
+      <span class="picker-room-code" id="pickerRoomCode">—</span>
+    </div>
+
+    <div class="picker-section-title">분과 선택</div>
+    <div class="section-options" id="sectionOptions">
+      <div class="picker-loading">불러오는 중…</div>
+    </div>
+
+    <div class="picker-divider">또는 새 분과 입력</div>
+    <div class="new-section-row">
+      <input type="text" id="newSectionInput" placeholder="분과 이름 입력 (예: 1분과, A팀)" maxlength="20"
+        onkeydown="if(event.key==='Enter') enterWithNewSection()" />
+      <button class="btn-new-section" onclick="enterWithNewSection()">입장</button>
+    </div>
+
+    <button class="btn-enter" id="btnEnter" onclick="enterRoom()" disabled>입장하기</button>
+  </div>
+</div>
+
+<!-- ── Presenter UI ── -->
 <div class="topbar" id="topbar">
-  <div style="display:flex;align-items:center;gap:0.8rem;">
+  <div style="display:flex;align-items:center;gap:0.7rem;">
     <div class="logo">Whispering</div>
-    <span class="session-val" id="roomNameDisplay" style="font-size:0.9rem;color:#e0e0e0;font-weight:700;">—</span>
+    <span class="session-val" id="roomNameDisplay" style="font-size:0.88rem;color:#e0e0e0;font-weight:700;">—</span>
+    <span class="section-tag" id="sectionTagTop"></span>
   </div>
   <div class="top-right">
     <span class="session-tag">방 코드</span>
@@ -251,41 +268,133 @@
 
 <div class="stage" id="stage">
   <div class="clock-widget" id="clockWidget"></div>
-
-  <div class="main-display" id="mainDisplay">
-    <div class="empty-state" id="emptyState">
-      <div class="empty-icon">💬</div>
-      <div class="empty-text">교육 담당자의 메시지를 기다리는 중…</div>
-    </div>
-  </div>
+  <div class="section-badge-stage" id="sectionBadge"></div>
+  <div class="main-display" id="mainDisplay"></div>
 </div>
 
-<div class="offline-banner" id="offlineBanner">
-  ⚠️ 연결이 끊어졌습니다. 재연결 중…
-</div>
+<div class="offline-banner" id="offlineBanner">⚠️ 연결이 끊어졌습니다. 재연결 중…</div>
+<div class="notice-banner" id="noticeBanner"></div>
 
 <script>
-  // ── State ──
-  const params    = new URLSearchParams(location.search);
-  const SESSION   = params.get('room') || params.get('session') || 'default';
-  const ROOM_NAME = params.get('name') || SESSION;
+  // ── Params ──
+  const params      = new URLSearchParams(location.search);
+  const SESSION     = params.get('room') || params.get('session') || 'default';
+  const ROOM_NAME   = params.get('name') || SESSION;
+  const SEC_ID_INIT = params.get('section')  || '';
+  const SEC_NM_INIT = params.get('sectionName') || SEC_ID_INIT;
+
+  let SECTION_ID   = SEC_ID_INIT;
+  let SECTION_NAME = SEC_NM_INIT;
+
   let ws, currentMessage = null, timerState = null, displayMode = 'both';
   let timerInterval, timerSecondsLeft = 0;
-  let idleTimer, topbarHidden = false;
+  let idleTimer, clockFullInterval;
+  let selectedSectionId = '', selectedSectionName = '';
 
+  // ── Basic display setup ──
   document.getElementById('sessionDisplay').textContent  = SESSION;
   document.getElementById('roomNameDisplay').textContent = ROOM_NAME;
+  document.getElementById('pickerRoomName').textContent  = ROOM_NAME;
+  document.getElementById('pickerRoomCode').textContent  = SESSION;
 
   // ── Clock ──
   function updateClock() {
     const now = new Date();
-    const h = String(now.getHours()).padStart(2,'0');
-    const m = String(now.getMinutes()).padStart(2,'0');
-    const s = String(now.getSeconds()).padStart(2,'0');
-    document.getElementById('clockWidget').textContent = `${h}:${m}:${s}`;
+    document.getElementById('clockWidget').textContent =
+      `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   }
+  function pad(n) { return String(n).padStart(2,'0'); }
   setInterval(updateClock, 1000);
   updateClock();
+
+  // ── Section picker ──
+  async function initPicker() {
+    if (SECTION_ID) {
+      // URL has section already → skip picker
+      hidePicker();
+      connect();
+      return;
+    }
+
+    // Load section list from server
+    try {
+      const res  = await fetch(`/api/rooms/${encodeURIComponent(SESSION)}`);
+      const data = await res.json();
+      renderPickerSections(data.sections || []);
+    } catch {
+      renderPickerSections([]);
+    }
+  }
+
+  function renderPickerSections(sections) {
+    const opts = document.getElementById('sectionOptions');
+    if (sections.length === 0) {
+      opts.innerHTML = '<div style="color:#444;font-size:0.82rem;text-align:center;padding:0.5rem;">아직 등록된 분과가 없습니다<br><span style="color:#333">아래에서 새 분과를 입력해 주세요</span></div>';
+      return;
+    }
+
+    opts.innerHTML = sections.map(s => `
+      <div class="section-option" id="opt-${escAttr(s.id)}"
+           onclick="selectSection('${escAttr(s.id)}','${escAttr(s.name)}')">
+        <div class="section-option-dot ${s.presenterCount === 0 ? 'empty' : ''}"></div>
+        <div class="section-option-info">
+          <div class="section-option-name">${escHtml(s.name)}</div>
+          <div class="section-option-count">발표자 ${s.presenterCount}명 접속 중</div>
+        </div>
+        <span class="section-option-check" style="display:none" id="chk-${escAttr(s.id)}">✓</span>
+      </div>
+    `).join('');
+  }
+
+  function selectSection(id, name) {
+    // Deselect previous
+    if (selectedSectionId) {
+      const prev = document.getElementById(`opt-${selectedSectionId}`);
+      const chk  = document.getElementById(`chk-${selectedSectionId}`);
+      if (prev) prev.classList.remove('selected');
+      if (chk)  chk.style.display = 'none';
+    }
+    selectedSectionId   = id;
+    selectedSectionName = name;
+    const el  = document.getElementById(`opt-${id}`);
+    const chk = document.getElementById(`chk-${id}`);
+    if (el)  el.classList.add('selected');
+    if (chk) chk.style.display = '';
+    document.getElementById('btnEnter').disabled = false;
+    document.getElementById('newSectionInput').value = '';
+  }
+
+  function enterRoom() {
+    if (!selectedSectionId) return;
+    SECTION_ID   = selectedSectionId;
+    SECTION_NAME = selectedSectionName;
+    hidePicker();
+    connect();
+  }
+
+  function enterWithNewSection() {
+    const name = document.getElementById('newSectionInput').value.trim();
+    if (!name) return;
+    SECTION_ID   = 'sec-' + Date.now();
+    SECTION_NAME = name;
+    hidePicker();
+    connect();
+  }
+
+  function hidePicker() {
+    document.getElementById('pickerOverlay').classList.add('hidden');
+    updateSectionUI();
+  }
+
+  function updateSectionUI() {
+    const tag    = document.getElementById('sectionTagTop');
+    const badge  = document.getElementById('sectionBadge');
+    const label  = SECTION_NAME || SECTION_ID;
+    if (label) {
+      tag.textContent   = label;
+      badge.textContent = `📌 ${label}`;
+    }
+  }
 
   // ── WebSocket ──
   function connect() {
@@ -293,29 +402,48 @@
     ws = new WebSocket(`${proto}//${location.host}`);
 
     ws.onopen = () => {
-      ws.send(JSON.stringify({ type: 'join', roomId: SESSION, payload: { role: 'presenter', name: ROOM_NAME } }));
+      ws.send(JSON.stringify({
+        type: 'join', roomId: SESSION,
+        payload: { role: 'presenter', name: ROOM_NAME, sectionId: SECTION_ID, sectionName: SECTION_NAME },
+      }));
       setConnected(true);
     };
 
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
       switch (msg.type) {
-        case 'message':      currentMessage = msg.payload; render(); break;
-        case 'clear_message': currentMessage = null; render(); break;
-        case 'timer':        handleTimer(msg.payload); break;
-        case 'clear_timer':  clearTimer(); break;
-        case 'display_mode': displayMode = msg.payload.mode; render(); break;
-        case 'coordinator_status':
-          // could show coordinator status if needed
+        case 'joined':
+          // Server confirmed section name
+          if (msg.payload.sectionName) SECTION_NAME = msg.payload.sectionName;
+          updateSectionUI();
+          render();
+          break;
+        case 'message':
+          currentMessage = msg.payload; render(); break;
+        case 'clear_message':
+          currentMessage = null; render(); break;
+        case 'timer':
+          handleTimer(msg.payload); break;
+        case 'clear_timer':
+          clearTimer(); break;
+        case 'display_mode':
+          displayMode = msg.payload.mode; render(); break;
+        case 'section_renamed':
+          if (msg.payload.sectionId === SECTION_ID) {
+            SECTION_NAME = msg.payload.sectionName;
+            updateSectionUI();
+          }
+          break;
+        case 'section_deleted':
+          if (msg.payload.sectionId === SECTION_ID) {
+            showNotice('담당자가 이 분과를 삭제했습니다. 잠시 후 새로고침됩니다.');
+            setTimeout(() => location.reload(), 3000);
+          }
           break;
       }
     };
 
-    ws.onclose = () => {
-      setConnected(false);
-      setTimeout(connect, 3000);
-    };
-
+    ws.onclose = () => { setConnected(false); setTimeout(connect, 3000); };
     ws.onerror = () => ws.close();
   }
 
@@ -328,7 +456,6 @@
   function handleTimer(payload) {
     clearInterval(timerInterval);
     timerState = payload;
-
     if (payload.running && payload.startedAt) {
       const elapsed = Math.floor((Date.now() - payload.startedAt) / 1000);
       timerSecondsLeft = Math.max(0, payload.seconds - elapsed);
@@ -352,36 +479,25 @@
 
   // ── Render ──
   function render() {
-    const display = document.getElementById('mainDisplay');
-    const empty   = document.getElementById('emptyState');
-
+    const display   = document.getElementById('mainDisplay');
     const showMsg   = (displayMode === 'both' || displayMode === 'message') && currentMessage;
-    const showTimer = (displayMode === 'both' || displayMode === 'timer') && timerState;
+    const showTimer = (displayMode === 'both' || displayMode === 'timer')   && timerState;
     const showClock = displayMode === 'clock';
 
     display.innerHTML = '';
+    clearInterval(clockFullInterval);
 
-    if (showClock) {
-      display.appendChild(buildClockFull());
-      return;
-    }
-
-    if (!showMsg && !showTimer) {
-      display.appendChild(buildEmpty());
-      return;
-    }
-
-    if (showMsg) display.appendChild(buildMessage(currentMessage));
+    if (showClock) { display.appendChild(buildClockFull()); return; }
+    if (!showMsg && !showTimer) { display.appendChild(buildEmpty()); return; }
+    if (showMsg)   display.appendChild(buildMessage(currentMessage));
     if (showTimer) display.appendChild(buildTimer());
   }
 
   function buildMessage(msg) {
     const card = document.createElement('div');
     card.className = `message-card ${msg.urgency} animate`;
-
     const labelMap = { normal: '📋 메시지', caution: '⚠️ 주의', urgent: '🚨 긴급' };
-    const timeStr = new Date(msg.timestamp).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-
+    const timeStr  = new Date(msg.timestamp).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
     card.innerHTML = `
       <div class="message-label">${labelMap[msg.urgency] || '메시지'}</div>
       <div class="message-text ${msg.urgency}">${escHtml(msg.text)}</div>
@@ -393,19 +509,15 @@
   function buildTimer() {
     const widget = document.createElement('div');
     widget.className = 'timer-widget';
-
     const m = Math.floor(timerSecondsLeft / 60);
     const s = timerSecondsLeft % 60;
-    const timeStr = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-
     let cls = '';
     if (timerSecondsLeft <= 60 && timerSecondsLeft > 0) cls = 'warning';
     if (timerSecondsLeft <= 10 && timerSecondsLeft > 0) cls = 'danger';
     if (timerSecondsLeft === 0 && timerState) cls = 'danger';
-
     widget.innerHTML = `
       <div class="timer-label">⏱️ 남은 시간</div>
-      <div class="timer-digits ${cls}">${timeStr}</div>
+      <div class="timer-digits ${cls}">${pad(m)}:${pad(s)}</div>
     `;
     return widget;
   }
@@ -414,50 +526,34 @@
     const wrap = document.createElement('div');
     wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0.8rem;';
 
-    const now  = new Date();
-    const h    = String(now.getHours()).padStart(2,'0');
-    const min  = String(now.getMinutes()).padStart(2,'0');
-    const sec  = String(now.getSeconds()).padStart(2,'0');
-    const days = ['일','월','화','수','목','금','토'];
-    const dateStr = `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
+    function nowStr() {
+      const n = new Date();
+      const ds = ['일','월','화','수','목','금','토'];
+      return {
+        time: `${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`,
+        date: `${n.getFullYear()}년 ${n.getMonth()+1}월 ${n.getDate()}일 (${ds[n.getDay()]})`,
+      };
+    }
 
-    wrap.innerHTML = `
-      <div class="clock-full">${h}:${min}:${sec}</div>
-      <div class="clock-date">${dateStr}</div>
-    `;
+    const { time, date } = nowStr();
+    wrap.innerHTML = `<div class="clock-full">${time}</div><div class="clock-date">${date}</div>`;
 
-    // Keep updating
-    clearInterval(clockFullInterval);
     clockFullInterval = setInterval(() => {
-      const n   = new Date();
-      const hh  = String(n.getHours()).padStart(2,'0');
-      const mm  = String(n.getMinutes()).padStart(2,'0');
-      const ss  = String(n.getSeconds()).padStart(2,'0');
-      const ds  = ['일','월','화','수','목','금','토'];
-      const dstr = `${n.getFullYear()}년 ${n.getMonth()+1}월 ${n.getDate()}일 (${ds[n.getDay()]})`;
-      const cf = document.querySelector('.clock-full');
-      const cd = document.querySelector('.clock-date');
-      if (cf) cf.textContent = `${hh}:${mm}:${ss}`;
-      if (cd) cd.textContent = dstr;
+      const { time: t, date: d } = nowStr();
+      const cf = wrap.querySelector('.clock-full');
+      const cd = wrap.querySelector('.clock-date');
+      if (cf) cf.textContent = t;
+      if (cd) cd.textContent = d;
     }, 1000);
 
     return wrap;
   }
 
-  let clockFullInterval;
-
   function buildEmpty() {
     const div = document.createElement('div');
     div.className = 'empty-state';
-    div.innerHTML = `
-      <div class="empty-icon">💬</div>
-      <div class="empty-text">교육 담당자의 메시지를 기다리는 중…</div>
-    `;
+    div.innerHTML = '<div class="empty-icon">💬</div><div class="empty-text">교육 담당자의 메시지를 기다리는 중…</div>';
     return div;
-  }
-
-  function escHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   // ── Fullscreen ──
@@ -473,35 +569,46 @@
     const inFs = !!document.fullscreenElement;
     document.getElementById('btnFs').textContent = inFs ? '✕ 전체화면 종료' : '⛶ 전체화면';
     if (inFs) startIdleTimer();
-    else { clearTimeout(idleTimer); showTopbar(); document.body.classList.remove('hide-cursor'); }
+    else {
+      clearTimeout(idleTimer);
+      document.getElementById('topbar').classList.remove('hidden');
+      document.body.classList.remove('hide-cursor');
+    }
   });
 
   function startIdleTimer() {
     clearTimeout(idleTimer);
-    showTopbar();
-    idleTimer = setTimeout(() => { hideTopbar(); document.body.classList.add('hide-cursor'); }, 3000);
-  }
-
-  function showTopbar() {
-    topbarHidden = false;
     document.getElementById('topbar').classList.remove('hidden');
     document.body.classList.remove('hide-cursor');
-  }
-
-  function hideTopbar() {
-    topbarHidden = true;
-    document.getElementById('topbar').classList.add('hidden');
+    idleTimer = setTimeout(() => {
+      document.getElementById('topbar').classList.add('hidden');
+      document.body.classList.add('hide-cursor');
+    }, 3000);
   }
 
   document.addEventListener('mousemove', () => {
     if (document.fullscreenElement) startIdleTimer();
   });
 
-  // Double-click to fullscreen
   document.getElementById('stage').addEventListener('dblclick', toggleFullscreen);
 
+  // ── Notice ──
+  function showNotice(msg) {
+    const el = document.getElementById('noticeBanner');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  // ── Utils ──
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function escAttr(s) {
+    return String(s).replace(/'/g,"\\'").replace(/"/g,'\\"');
+  }
+
   // ── Init ──
-  connect();
+  initPicker();
 </script>
 </body>
 </html>
