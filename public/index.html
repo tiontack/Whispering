@@ -30,7 +30,7 @@
       font-size: 1.6rem;
       font-weight: 800;
       letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #7c3aed, #a78bfa, #60a5fa);
+      background: linear-gradient(135deg, #0d9488, #5eead4, #60a5fa);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -89,7 +89,7 @@
       transition: border-color 0.2s;
       margin-bottom: 1rem;
     }
-    input[type="text"]:focus { border-color: #7c3aed; }
+    input[type="text"]:focus { border-color: #0d9488; }
     input::placeholder { color: #444; }
     input.error { border-color: #ef4444 !important; animation: shake 0.3s ease; }
     @keyframes shake {
@@ -106,7 +106,7 @@
       padding: 0.7rem 0.8rem; color: #888; cursor: pointer; font-size: 0.8rem;
       white-space: nowrap; transition: all 0.2s; flex-shrink: 0;
     }
-    .btn-gen:hover { border-color: #7c3aed; color: #a78bfa; }
+    .btn-gen:hover { border-color: #0d9488; color: #5eead4; }
 
     /* ── Role buttons ── */
     .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
@@ -117,10 +117,10 @@
       cursor: pointer; transition: all 0.18s; text-decoration: none; color: inherit;
       font-size: inherit; background: transparent;
     }
-    .role-btn.coordinator { background: linear-gradient(135deg,#1e1040,#2d1b5e); border-color: #5b21b6; }
+    .role-btn.coordinator { background: linear-gradient(135deg,#042f2e,#0f3d38); border-color: #0f766e; }
     .role-btn.presenter   { background: linear-gradient(135deg,#0f2027,#1a3a4a); border-color: #1d4ed8; }
     .role-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
-    .role-btn.coordinator:hover { border-color: #7c3aed; }
+    .role-btn.coordinator:hover { border-color: #0d9488; }
     .role-btn.presenter:hover   { border-color: #3b82f6; }
     .role-icon { font-size: 1.6rem; }
     .role-name { font-size: 0.88rem; font-weight: 600; }
@@ -171,7 +171,7 @@
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .room-meta { font-size: 0.75rem; color: #666; margin-top: 0.2rem; display: flex; gap: 0.8rem; }
     .room-stat { display: flex; align-items: center; gap: 0.25rem; }
-    .dot-coord { color: #a78bfa; }
+    .dot-coord { color: #5eead4; }
     .dot-pres  { color: #60a5fa; }
 
     .room-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
@@ -180,8 +180,8 @@
       cursor: pointer; border: 1px solid; font-weight: 600; transition: all 0.15s;
       white-space: nowrap;
     }
-    .join-coord { background: #1e1040; border-color: #5b21b6; color: #a78bfa; }
-    .join-coord:hover { background: #2d1b5e; border-color: #7c3aed; }
+    .join-coord { background: #042f2e; border-color: #0f766e; color: #5eead4; }
+    .join-coord:hover { background: #0f3d38; border-color: #0d9488; }
     .join-pres  { background: #0f2027; border-color: #1d4ed8; color: #60a5fa; }
     .join-pres:hover  { background: #1a3a4a; border-color: #3b82f6; }
 
