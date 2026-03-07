@@ -246,11 +246,12 @@
     /* ── Stage fullscreen button ── */
     .btn-stage-fs {
       position: absolute; bottom: 1.5rem; right: 1.5rem;
-      background: rgba(10,10,25,0.7); border: 1px solid #2a2a4a; border-radius: 10px;
-      padding: 0.55rem 1rem; color: #555; cursor: pointer; font-size: 0.9rem;
-      transition: all 0.2s; z-index: 5; backdrop-filter: blur(4px);
+      background: rgba(10,10,25,0.85); border: 1px solid #3a3a5a; border-radius: 10px;
+      padding: 0.6rem 1.1rem; color: #aaa; cursor: pointer; font-size: 0.9rem;
+      transition: opacity 0.3s, border-color 0.2s, color 0.2s; z-index: 5;
+      backdrop-filter: blur(6px);
     }
-    .btn-stage-fs:hover { border-color: #0d9488; color: #5eead4; background: rgba(13,148,136,0.15); }
+    .btn-stage-fs:hover { border-color: #0d9488; color: #5eead4; background: rgba(13,148,136,0.2); }
     .btn-stage-fs.hidden { opacity: 0; pointer-events: none; }
 
     /* ── CSS Fake Fullscreen (모바일 폴백) ── */
@@ -263,12 +264,13 @@
       background: #050510;
       overflow: hidden;
     }
-    /* ── Native fullscreen ── */
-    .stage:fullscreen,
-    .stage:-webkit-full-screen,
-    .stage:-moz-full-screen {
-      background: #050510;
-    }
+    /* ── Native fullscreen: 브라우저 크롬까지 완전히 덮음 ── */
+    :fullscreen          .topbar { display: none !important; }
+    :-webkit-full-screen .topbar { display: none !important; }
+    :-moz-full-screen    .topbar { display: none !important; }
+    /* 전체화면 종료 버튼: 항상 보이게 */
+    :fullscreen          .btn-stage-fs.hidden { opacity: 1 !important; pointer-events: auto !important; }
+    :-webkit-full-screen .btn-stage-fs.hidden { opacity: 1 !important; pointer-events: auto !important; }
 
     /* ── Mobile / Tablet Responsive ── */
     @media (max-width: 768px) {
@@ -281,6 +283,8 @@
         padding: 0.75rem 1.1rem; font-size: 0.95rem;
         min-height: 44px;
       }
+      .btn-quick-msg { bottom: 1.2rem; left: 1.2rem; min-height: 44px; }
+      .quick-msg-panel { bottom: 4.8rem; left: 1.2rem; }
     }
     @media (max-width: 480px) {
       .logo { font-size: 0.95rem; }
@@ -296,6 +300,8 @@
         padding: 0.85rem 1.3rem; font-size: 1rem;
         border-radius: 12px; min-height: 48px;
       }
+      .btn-quick-msg { bottom: 0.9rem; left: 0.9rem; border-radius: 12px; min-height: 48px; padding: 0.85rem 1rem; font-size: 0.9rem; }
+      .quick-msg-panel { left: 0.9rem; bottom: 4.5rem; max-width: calc(100vw - 1.8rem); }
       .empty-icon { font-size: 2.8rem; }
       .empty-text { font-size: 0.88rem; }
       /* 입력 줌 방지 (iOS) */
@@ -308,6 +314,44 @@
     }
     /* 터치 기기: 더블탭 줌 방지 */
     button { touch-action: manipulation; }
+
+    /* ── Quick message to coordinator ── */
+    .btn-quick-msg {
+      position: absolute; bottom: 1.5rem; left: 1.5rem;
+      background: rgba(10,10,25,0.85); border: 1px solid #3a3a5a; border-radius: 10px;
+      padding: 0.6rem 1.1rem; color: #aaa; cursor: pointer; font-size: 0.9rem;
+      transition: all 0.2s; z-index: 5; backdrop-filter: blur(6px);
+    }
+    .btn-quick-msg:hover { border-color: #5b21b6; color: #c4b5fd; background: rgba(91,33,182,0.2); }
+
+    .quick-msg-panel {
+      position: absolute; bottom: 4.5rem; left: 1.5rem;
+      background: rgba(15,15,30,0.97); border: 1px solid #2a2a4a; border-radius: 14px;
+      padding: 0.9rem; display: flex; flex-direction: column; gap: 0.45rem;
+      z-index: 6; min-width: 200px; max-width: 260px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.7); backdrop-filter: blur(10px);
+      transform-origin: bottom left;
+      animation: qpIn 0.18s ease;
+    }
+    .quick-msg-panel.hidden { display: none; }
+    @keyframes qpIn { from { opacity:0; transform: scale(0.92) translateY(6px); } to { opacity:1; transform: scale(1) translateY(0); } }
+
+    .qp-title {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: #555; font-weight: 700; padding: 0 0.2rem 0.3rem; border-bottom: 1px solid #1a1a3a;
+    }
+    .qp-btn {
+      background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 8px;
+      padding: 0.55rem 0.8rem; color: #ccc; cursor: pointer; font-size: 0.85rem;
+      text-align: left; transition: all 0.15s; width: 100%;
+    }
+    .qp-btn:hover { border-color: #7c3aed; color: #c4b5fd; background: #1a0a35; }
+    .qp-btn:active { transform: scale(0.97); }
+    .qp-sent {
+      font-size: 0.75rem; color: #4ade80; text-align: center;
+      padding: 0.3rem; animation: fadeOut 1.5s ease forwards;
+    }
+    @keyframes fadeOut { 0%,60% { opacity:1; } 100% { opacity:0; } }
 
     /* ── Picker refresh button ── */
     .btn-picker-refresh {
@@ -373,6 +417,20 @@
   <div class="section-badge-stage" id="sectionBadge"></div>
   <div class="main-display" id="mainDisplay"></div>
   <button class="btn-stage-fs" id="btnStageFs" onclick="toggleFullscreen()" title="전체화면 (더블클릭도 가능)">⛶ 전체화면</button>
+
+  <!-- 담당자에게 빠른 메시지 -->
+  <button class="btn-quick-msg" id="btnQuickMsg" onclick="toggleQuickPanel()">💬 담당자에게</button>
+  <div class="quick-msg-panel hidden" id="quickPanel">
+    <div class="qp-title">담당자에게 전달</div>
+    <button class="qp-btn" onclick="sendPresenterMsg('✋ 잠깐 멈춰주세요')">✋ 잠깐 멈춰주세요</button>
+    <button class="qp-btn" onclick="sendPresenterMsg('👍 준비됐습니다')">👍 준비됐습니다</button>
+    <button class="qp-btn" onclick="sendPresenterMsg('❓ 메시지를 못 봤어요')">❓ 메시지를 못 봤어요</button>
+    <button class="qp-btn" onclick="sendPresenterMsg('🔊 잘 안들립니다')">🔊 잘 안들립니다</button>
+    <button class="qp-btn" onclick="sendPresenterMsg('⏱ 시간이 부족합니다')">⏱ 시간이 부족합니다</button>
+    <button class="qp-btn" onclick="sendPresenterMsg('✅ 잘 받았습니다')">✅ 잘 받았습니다</button>
+    <button class="qp-btn" onclick="sendPresenterMsg('🙋 질문 있습니다')">🙋 질문 있습니다</button>
+    <button class="qp-btn" onclick="sendPresenterMsg('📡 화면 공유 확인 필요')">📡 화면 공유 확인 필요</button>
+  </div>
 </div>
 
 <div class="offline-banner" id="offlineBanner">⚠️ 연결이 끊어졌습니다. 재연결 중…</div>
@@ -700,7 +758,8 @@
     }
     if (cssFullscreen) { exitCssFs(); return; }
 
-    const el = document.getElementById('stage');
+    // documentElement로 fullscreen → 브라우저 탭/주소창까지 완전히 덮음
+    const el = document.documentElement;
     const reqFs = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
     if (reqFs) {
       reqFs.call(el).catch(() => enterCssFs()); // 네이티브 실패 시 CSS 폴백
@@ -778,6 +837,34 @@
     }
     lastTap = now;
   }, { passive: false });
+
+  // ── Quick message to coordinator ──
+  function toggleQuickPanel() {
+    const panel = document.getElementById('quickPanel');
+    panel.classList.toggle('hidden');
+  }
+
+  function sendPresenterMsg(text) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'presenter_message', roomId: SESSION, payload: { text } }));
+    }
+    // 피드백 표시 후 패널 닫기
+    const panel = document.getElementById('quickPanel');
+    const sent = document.createElement('div');
+    sent.className = 'qp-sent';
+    sent.textContent = '✓ 전송됨';
+    panel.appendChild(sent);
+    setTimeout(() => { sent.remove(); panel.classList.add('hidden'); }, 1000);
+  }
+
+  // 패널 외부 클릭 시 닫기
+  document.addEventListener('click', (e) => {
+    const panel = document.getElementById('quickPanel');
+    const btn   = document.getElementById('btnQuickMsg');
+    if (!panel.classList.contains('hidden') && !panel.contains(e.target) && e.target !== btn) {
+      panel.classList.add('hidden');
+    }
+  });
 
   // ── Notice ──
   function showNotice(msg) {

@@ -188,7 +188,7 @@
     .display-btn.active { background: #042f2e; border-color: #0f766e; color: #5eead4; }
 
     /* ── History ── */
-    .history-list { display: flex; flex-direction: column; gap: 0.4rem; max-height: 160px; overflow-y: auto; }
+    .history-list { display: flex; flex-direction: column; gap: 0.3rem; max-height: 220px; overflow-y: auto; }
     .history-item {
       background: #0f0f1a; border: 1px solid #222; border-radius: 8px;
       padding: 0.5rem 0.7rem; font-size: 0.82rem; color: #aaa;
@@ -201,6 +201,14 @@
     .badge-urgent  { background: #450a0a; color: #f87171; }
     .badge-section { background: #0f1f2a; color: #60a5fa; border: 1px solid #1d4ed8; }
     .history-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* 확인 답글 */
+    .history-ack-item {
+      margin-left: 1.2rem; display: flex; align-items: center; gap: 0.4rem;
+      background: #0a1a0f; border: 1px solid #1a3a25; border-radius: 6px;
+      padding: 0.3rem 0.6rem; font-size: 0.75rem; color: #4ade80;
+    }
+    .history-ack-item .ack-who { font-weight: 600; }
+    .history-ack-item .ack-time { color: #2a6a3a; font-size: 0.68rem; margin-left: auto; }
 
     /* ── Sidebar ── */
     .sidebar { display: flex; flex-direction: column; gap: 0.9rem; }
@@ -287,17 +295,20 @@
     }
     @keyframes ackFadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
-    /* ── Ack log panel ── */
-    .ack-log {
-      display: flex; flex-direction: column; gap: 0.3rem;
-      max-height: 120px; overflow-y: auto; margin-top: 0.3rem;
+    /* ── Presenter messages panel ── */
+    .presenter-msg-list { display: flex; flex-direction: column; gap: 0.4rem; max-height: 200px; overflow-y: auto; }
+    .presenter-msg-item {
+      background: #0f0a1f; border: 1px solid #3a2a5a; border-radius: 8px;
+      padding: 0.5rem 0.7rem; display: flex; flex-direction: column; gap: 0.2rem;
     }
-    .ack-log-item {
-      font-size: 0.78rem; color: #4ade80; background: #0a1f0f;
-      border: 1px solid #166534; border-radius: 8px;
-      padding: 0.35rem 0.6rem;
+    .presenter-msg-who { font-size: 0.72rem; color: #9f7aea; font-weight: 600; }
+    .presenter-msg-text { font-size: 0.88rem; color: #e0d0ff; }
+    .presenter-msg-time { font-size: 0.68rem; color: #554466; text-align: right; }
+    .presenter-msg-badge {
+      display: inline-block; font-size: 0.68rem; background: #3a1a5a; color: #c4b5fd;
+      border: 1px solid #7c3aed; border-radius: 10px; padding: 0.1rem 0.4rem; margin-right: 0.3rem;
     }
-    .ack-log-empty { font-size: 0.75rem; color: #333; text-align: center; padding: 0.3rem; }
+    .presenter-msg-empty { font-size: 0.75rem; color: #333; text-align: center; padding: 0.5rem; }
 
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 3px; }
@@ -492,6 +503,17 @@
       </div>
     </div>
 
+    <!-- 발표자가 보낸 메시지 -->
+    <div class="panel">
+      <div class="section-header" style="margin-bottom:0.4rem;">
+        <div class="panel-title">발표자 메시지</div>
+        <span id="presenterMsgBadge" style="display:none;font-size:0.7rem;background:#3a1a5a;color:#c4b5fd;border:1px solid #7c3aed;border-radius:10px;padding:0.1rem 0.5rem;">NEW</span>
+      </div>
+      <div class="presenter-msg-list" id="presenterMsgList">
+        <div class="presenter-msg-empty">발표자가 보낸 메시지가 없습니다</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -513,6 +535,7 @@
   let displayMode = 'both';
   const history   = [];
   const ackedSections = new Map(); // sectionId → sectionName (현재 메시지 확인한 분과)
+  const presenterMessages = []; // 발표자가 보낸 메시지 로그
 
   document.getElementById('sessionCodeDisplay').textContent = SESSION;
   document.getElementById('roomNameDisplay').textContent    = ROOM_NAME;
@@ -545,7 +568,21 @@
           const { sectionName, sectionId } = msg.payload;
           ackedSections.set(sectionId, sectionName);
           showAckNotification(sectionName);
-          renderSections(); // 분과 목록에 확인 상태 표시
+          renderSections();
+          // 가장 최근 히스토리 항목에 답글로 추가
+          if (history.length > 0) {
+            if (!history[0].acks) history[0].acks = [];
+            history[0].acks.push({ sectionName, time: Date.now() });
+            renderHistory();
+          }
+          break;
+        }
+        case 'presenter_message': {
+          const pm = msg.payload;
+          presenterMessages.unshift(pm);
+          if (presenterMessages.length > 30) presenterMessages.pop();
+          renderPresenterMessages();
+          showPresenterMsgToast(pm.sectionName, pm.text);
           break;
         }
         case 'kicked':
@@ -755,7 +792,7 @@
   }
 
   function addHistory(payload) {
-    history.unshift(payload);
+    history.unshift({ ...payload, acks: [] });
     if (history.length > 10) history.pop();
     renderHistory();
   }
@@ -772,7 +809,51 @@
         ${h.targetName !== '전체' ? `<span class="history-badge badge-section">${escHtml(h.targetName)}</span>` : ''}
         <span class="history-text">${escHtml(h.text)}</span>
       </div>
+      ${(h.acks || []).map(a => `
+        <div class="history-ack-item">
+          <span>↩</span>
+          <span class="ack-who">${escHtml(a.sectionName)} 발표자</span>
+          <span>메시지 확인</span>
+          <span class="ack-time">${fmtTime(a.time)}</span>
+        </div>
+      `).join('')}
     `).join('');
+  }
+
+  function fmtTime(ts) {
+    const d = new Date(ts);
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  // ── Presenter messages ──
+  function renderPresenterMessages() {
+    const list = document.getElementById('presenterMsgList');
+    const badge = document.getElementById('presenterMsgBadge');
+    if (!presenterMessages.length) {
+      list.innerHTML = '<div class="presenter-msg-empty">발표자가 보낸 메시지가 없습니다</div>';
+      badge.style.display = 'none';
+      return;
+    }
+    badge.style.display = '';
+    list.innerHTML = presenterMessages.map(m => `
+      <div class="presenter-msg-item">
+        <div class="presenter-msg-who">
+          <span class="presenter-msg-badge">발표자</span>${escHtml(m.sectionName)}
+        </div>
+        <div class="presenter-msg-text">${escHtml(m.text)}</div>
+        <div class="presenter-msg-time">${fmtTime(m.timestamp)}</div>
+      </div>
+    `).join('');
+  }
+
+  let pmToastTimer;
+  function showPresenterMsgToast(sectionName, text) {
+    const t = document.getElementById('toast');
+    t.textContent = `💬 ${sectionName}: ${text}`;
+    t.style.borderColor = '#7c3aed';
+    t.classList.add('show');
+    clearTimeout(pmToastTimer);
+    pmToastTimer = setTimeout(() => { t.classList.remove('show'); t.style.borderColor = ''; }, 4000);
   }
 
   function reuseMsg(text, urg) {

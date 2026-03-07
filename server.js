@@ -352,6 +352,21 @@ wss.on('connection', (ws) => {
         break;
       }
 
+      // ── Presenter → Coordinator quick message ──
+      case 'presenter_message': {
+        const client = clients.get(ws);
+        if (!client || client.role !== 'presenter') return;
+        const room = rooms.get(client.roomId);
+        if (!room) return;
+        const section = room.sections.get(client.sectionId);
+        const sectionName = section ? section.name : (client.sectionId || '발표자');
+        sendToCoordinator(client.roomId, {
+          type: 'presenter_message',
+          payload: { sectionId: client.sectionId, sectionName, text: payload.text, timestamp: Date.now() },
+        });
+        break;
+      }
+
       case 'ping':
         ws.send(JSON.stringify({ type: 'pong' }));
         break;
