@@ -1,0 +1,31 @@
+name: 🔀 Auto Merge PR to Main
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: '머지할 브랜치'
+        required: false
+        default: 'claude/whispering-presenter-app-774bo'
+
+jobs:
+  merge:
+    name: Merge to main
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge branch to main
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name  "GitHub Actions"
+          git checkout main
+          git merge origin/${{ github.event.inputs.branch }} --no-ff -m "chore: merge ${{ github.event.inputs.branch }} to main"
+          git push origin main

@@ -1,27 +1,24 @@
-name: Deploy
+name: 🚀 Deploy to Railway
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:  # 수동 실행 버튼
 
 jobs:
   deploy:
+    name: Deploy
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Verify server starts
-        run: |
-          timeout 5 node server.js &
-          sleep 3
-          curl -f http://localhost:3000/api/rooms || exit 1
-          kill %1 || true
+      - name: Deploy to Railway
+        run: railway up --service whispering --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
