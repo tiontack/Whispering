@@ -471,8 +471,9 @@
 
   let ws;
   let urgency     = 'normal';
-  let targetId    = 'all';      // 'all' | sectionId
-  let sections    = [];         // [{ id, name, presenterCount }]
+  let targetMode  = 'all';           // 'all' | 'multi'
+  let selectedSectionIds = new Set(); // used when targetMode === 'multi'
+  let sections    = [];              // [{ id, name, presenterCount }]
   let timerSeconds = 0, timerRunning = false, timerInterval;
   let displayMode = 'both';
   const history   = [];
@@ -553,8 +554,8 @@
   function deleteSection(sectionId, sectionName) {
     if (!confirm(`"${sectionName}" 분과를 삭제하시겠습니까?\n해당 분과의 발표자 화면 연결이 끊어집니다.`)) return;
     send({ type: 'delete_section', payload: { sectionId } });
-    // If target was this section, reset to 'all'
-    if (targetId === sectionId) setTarget('all');
+    selectedSectionIds.delete(sectionId);
+    if (selectedSectionIds.size === 0 && targetMode === 'multi') targetMode = 'all';
     showToast(`분과 "${sectionName}" 삭제됨`);
   }
 
@@ -599,20 +600,21 @@
 
   function renderTargetChips() {
     const row = document.getElementById('targetRow');
-    // Keep the 전체 chip and empty hint, rebuild section chips
     const existing = row.querySelectorAll('.target-chip:not(#chip-all)');
     existing.forEach(el => el.remove());
 
+    const isAll = targetMode === 'all';
+    document.getElementById('chip-all').className = 'target-chip' + (isAll ? ' active-all' : '');
+
     sections.forEach(s => {
       const chip = document.createElement('button');
-      chip.className = 'target-chip' + (targetId === s.id ? ' active-section' : '');
+      // 전체 모드: 모든 칩 민트로 불켜짐 / 다중 모드: 선택된 칩만 초록으로
+      const cls = isAll ? ' active-all' : (selectedSectionIds.has(s.id) ? ' active-section' : '');
+      chip.className = 'target-chip' + cls;
       chip.textContent = s.name;
       chip.onclick = () => setTarget(s.id);
       row.appendChild(chip);
     });
-
-    // Update 전체 chip state
-    document.getElementById('chip-all').className = 'target-chip' + (targetId === 'all' ? ' active-all' : '');
   }
 
   function renderSectionLinks() {
@@ -632,12 +634,26 @@
 
   // ── Target ──
   function setTarget(id) {
-    targetId = id;
-    // Update all chips
-    document.getElementById('chip-all').className = 'target-chip' + (id === 'all' ? ' active-all' : '');
-    document.querySelectorAll('.target-chip:not(#chip-all)').forEach((chip, i) => {
-      chip.className = 'target-chip' + (sections[i] && sections[i].id === id ? ' active-section' : '');
-    });
+    if (id === 'all') {
+      targetMode = 'all';
+      selectedSectionIds.clear();
+    } else {
+      if (targetMode === 'all') {
+        // 전체 → 다중: 해당 분과만 선택
+        targetMode = 'multi';
+        selectedSectionIds.clear();
+        selectedSectionIds.add(id);
+      } else {
+        // 다중 모드에서 토글
+        if (selectedSectionIds.has(id)) {
+          selectedSectionIds.delete(id);
+          if (selectedSectionIds.size === 0) targetMode = 'all'; // 아무것도 없으면 전체로 복귀
+        } else {
+          selectedSectionIds.add(id);
+        }
+      }
+    }
+    renderTargetChips();
   }
 
   // ── Urgency ──
@@ -660,17 +676,32 @@
   function sendMessage() {
     const text = document.getElementById('msgInput').value.trim();
     if (!text) return;
-    const targetName = targetId === 'all' ? '전체' : (sections.find(s => s.id === targetId)?.name || targetId);
-    const payload = { text, urgency, target: targetId, targetName, timestamp: Date.now() };
-    send({ type: 'message', payload });
-    addHistory(payload);
-    updatePreview(text, urgency);
-    const label = targetId === 'all' ? '전체에게' : `[${targetName}]에게`;
-    showToast(`${label} 메시지 전송`);
+    const timestamp = Date.now();
+
+    if (targetMode === 'all') {
+      const payload = { text, urgency, target: 'all', targetName: '전체', timestamp };
+      send({ type: 'message', payload });
+      addHistory(payload);
+      updatePreview(text, urgency);
+      showToast('전체에게 메시지 전송');
+    } else {
+      const targets = sections.filter(s => selectedSectionIds.has(s.id));
+      targets.forEach(s => {
+        send({ type: 'message', payload: { text, urgency, target: s.id, targetName: s.name, timestamp } });
+      });
+      const names = targets.map(s => s.name).join(', ');
+      addHistory({ text, urgency, target: [...selectedSectionIds][0], targetName: names, timestamp });
+      updatePreview(text, urgency);
+      showToast(`[${names}]에게 메시지 전송`);
+    }
   }
 
   function clearMessage() {
-    send({ type: 'clear_message', payload: { target: targetId } });
+    if (targetMode === 'all') {
+      send({ type: 'clear_message', payload: { target: 'all' } });
+    } else {
+      selectedSectionIds.forEach(id => send({ type: 'clear_message', payload: { target: id } }));
+    }
     updatePreview(null, null);
     document.getElementById('msgInput').value = '';
     updateCharCount();
@@ -779,7 +810,11 @@
     ['both','message','timer','clock'].forEach(m => {
       document.getElementById(`dm-${m}`).classList.toggle('active', m === mode);
     });
-    send({ type: 'display_mode', payload: { mode, target: targetId } });
+    if (targetMode === 'all') {
+      send({ type: 'display_mode', payload: { mode, target: 'all' } });
+    } else {
+      selectedSectionIds.forEach(id => send({ type: 'display_mode', payload: { mode, target: id } }));
+    }
   }
 
   // ── Utils ──
