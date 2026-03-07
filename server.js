@@ -3,6 +3,7 @@ const http = require('http');
 const WebSocket = require('ws');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const db = require('./database');
 
 const app = express();
 const server = http.createServer(app);
@@ -12,12 +13,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
 /*
-  Room structure:
-  {
-    id, name, coordinator, createdAt,
+  In-memory runtime state (augmented by SQLite for persistence):
+  rooms: Map<roomId, {
+    id, name, coordinator: ws|null,
     sections: Map<sectionId, { id, name, presenters: Set<ws>, lastMessage }>,
-    timer: { ... } | null   ← shared room-wide timer
-  }
+    timer: null | { seconds, running, startedAt }
+  }>
 */
 const rooms = new Map();
 const clients = new Map(); // ws → { role, roomId, sectionId, id }
@@ -33,6 +34,7 @@ function getOrCreateSection(room, sectionId, sectionName) {
       presenters: new Set(),
       lastMessage: null,
     });
+    db.upsertSection(room.id, sectionId, sectionName || sectionId);
   }
   return room.sections.get(sectionId);
 }
@@ -46,32 +48,44 @@ function sectionsSummary(room) {
 }
 
 function totalPresenterCount(room) {
-  let count = 0;
-  for (const s of room.sections.values()) count += s.presenters.size;
-  return count;
-}
-
-function pruneEmptySection(room, sectionId) {
-  const section = room.sections.get(sectionId);
-  if (section && section.presenters.size === 0) {
-    // Keep coordinator-pinned sections; prune auto-created empties on presenter leave
-    // We'll prune only if section was auto-created (no pinned flag).
-    // For simplicity: keep sections while coordinator is online, delete when room empties.
-  }
+  let n = 0;
+  for (const s of room.sections.values()) n += s.presenters.size;
+  return n;
 }
 
 // ── Room helpers ─────────────────────────────────────────────────────────────
 
 function getOrCreateRoom(roomId, name) {
   if (!rooms.has(roomId)) {
+    // Try to restore sections from DB
+    db.upsertRoom(roomId, name || roomId);
+    const savedSections = db.getSections(roomId);
+
+    const sectionsMap = new Map();
+    for (const s of savedSections) {
+      sectionsMap.set(s.id, {
+        id: s.id,
+        name: s.name,
+        presenters: new Set(),
+        lastMessage: null,
+      });
+    }
+
     rooms.set(roomId, {
       id: roomId,
       name: name || roomId,
       coordinator: null,
-      sections: new Map(),
+      sections: sectionsMap,
       timer: null,
       createdAt: Date.now(),
     });
+  } else if (name) {
+    // Update name if provided
+    const room = rooms.get(roomId);
+    if (room.name !== name) {
+      room.name = name;
+      db.upsertRoom(roomId, name);
+    }
   }
   return rooms.get(roomId);
 }
@@ -91,13 +105,12 @@ function roomSummary(room) {
 
 function broadcastRoomList() {
   const list = [...rooms.values()].map(roomSummary);
-  const msg = JSON.stringify({ type: 'room_list', payload: { rooms: list } });
+  const msg  = JSON.stringify({ type: 'room_list', payload: { rooms: list } });
   for (const ws of lobbyClients) {
     if (ws.readyState === WebSocket.OPEN) ws.send(msg);
   }
 }
 
-/** Send to presenters in a target section or all sections. */
 function broadcastToPresenters(roomId, data, target = 'all') {
   const room = rooms.get(roomId);
   if (!room) return;
@@ -162,13 +175,14 @@ wss.on('connection', (ws) => {
       case 'join': {
         const { role, name, sectionId, sectionName } = payload;
         const room = getOrCreateRoom(roomId, name);
+        db.touchRoom(roomId);
 
         if (role === 'coordinator') {
           if (room.coordinator && room.coordinator !== ws && room.coordinator.readyState === WebSocket.OPEN) {
             room.coordinator.send(JSON.stringify({ type: 'kicked', payload: { reason: '다른 담당자가 접속했습니다.' } }));
           }
           room.coordinator = ws;
-          if (name) room.name = name;
+          if (name && room.name !== name) { room.name = name; db.upsertRoom(roomId, name); }
           clients.set(ws, { role: 'coordinator', roomId, sectionId: null, id: uuidv4() });
 
           ws.send(JSON.stringify({
@@ -178,9 +192,8 @@ wss.on('connection', (ws) => {
           broadcastToPresenters(roomId, { type: 'coordinator_status', payload: { online: true } });
 
         } else {
-          // Presenter must have a sectionId
-          const sid  = sectionId  || 'general';
-          const sname = sectionName || (sectionId ? sectionId : '일반');
+          const sid    = sectionId   || 'general';
+          const sname  = sectionName || (sectionId ? sectionId : '일반');
           const section = getOrCreateSection(room, sid, sname);
           section.presenters.add(ws);
           clients.set(ws, { role: 'presenter', roomId, sectionId: sid, id: uuidv4() });
@@ -190,9 +203,10 @@ wss.on('connection', (ws) => {
             payload: { role: 'presenter', roomId, name: room.name, sectionId: sid, sectionName: section.name },
           }));
 
-          // Replay last state for this section
-          if (section.lastMessage) {
-            ws.send(JSON.stringify({ type: 'message', payload: section.lastMessage }));
+          // Replay last message for this section from DB
+          const lastMsg = db.getLastMessageForSection(roomId, sid);
+          if (lastMsg) {
+            ws.send(JSON.stringify({ type: 'message', payload: lastMsg }));
           }
           if (room.timer) {
             ws.send(JSON.stringify({ type: 'timer', payload: room.timer }));
@@ -205,7 +219,7 @@ wss.on('connection', (ws) => {
         break;
       }
 
-      // ── Section management (coordinator only) ──
+      // ── Section management ──
       case 'create_section': {
         const client = clients.get(ws);
         if (!client || client.role !== 'coordinator') return;
@@ -225,7 +239,6 @@ wss.on('connection', (ws) => {
         if (!room) return;
         const section = room.sections.get(payload.sectionId);
         if (!section) return;
-        // Move presenters out → send them a section_deleted notice
         for (const presWs of section.presenters) {
           if (presWs.readyState === WebSocket.OPEN) {
             presWs.send(JSON.stringify({ type: 'section_deleted', payload: { sectionId: payload.sectionId } }));
@@ -233,6 +246,7 @@ wss.on('connection', (ws) => {
           clients.delete(presWs);
         }
         room.sections.delete(payload.sectionId);
+        db.deleteSection(client.roomId, payload.sectionId);
         notifyCoordinatorSections(client.roomId);
         broadcastRoomList();
         break;
@@ -246,7 +260,7 @@ wss.on('connection', (ws) => {
         const section = room.sections.get(payload.sectionId);
         if (!section) return;
         section.name = payload.sectionName || section.name;
-        // Notify all presenters in that section of the new name
+        db.renameSection(client.roomId, payload.sectionId, section.name);
         for (const presWs of section.presenters) {
           if (presWs.readyState === WebSocket.OPEN) {
             presWs.send(JSON.stringify({ type: 'section_renamed', payload: { sectionId: section.id, sectionName: section.name } }));
@@ -256,7 +270,7 @@ wss.on('connection', (ws) => {
         break;
       }
 
-      // ── Message (target: 'all' | sectionId) ──
+      // ── Message ──
       case 'message': {
         const client = clients.get(ws);
         if (!client || client.role !== 'coordinator') return;
@@ -266,14 +280,13 @@ wss.on('connection', (ws) => {
         const target = payload.target || 'all';
 
         if (target === 'all') {
-          for (const section of room.sections.values()) {
-            section.lastMessage = payload;
-          }
+          for (const section of room.sections.values()) section.lastMessage = payload;
         } else {
           const section = room.sections.get(target);
           if (section) section.lastMessage = payload;
         }
 
+        db.saveMessage(client.roomId, payload);
         broadcastToPresenters(client.roomId, { type: 'message', payload }, target);
         break;
       }
@@ -283,16 +296,13 @@ wss.on('connection', (ws) => {
         if (!client || client.role !== 'coordinator') return;
         const room = rooms.get(client.roomId);
         if (!room) return;
-
         const target = payload?.target || 'all';
-
         if (target === 'all') {
           for (const section of room.sections.values()) section.lastMessage = null;
         } else {
           const section = room.sections.get(target);
           if (section) section.lastMessage = null;
         }
-
         broadcastToPresenters(client.roomId, { type: 'clear_message', payload: { target } }, target);
         break;
       }
@@ -318,7 +328,7 @@ wss.on('connection', (ws) => {
         break;
       }
 
-      // ── Display mode (room-wide or per target) ──
+      // ── Display mode ──
       case 'display_mode': {
         const client = clients.get(ws);
         if (!client || client.role !== 'coordinator') return;
@@ -353,6 +363,7 @@ wss.on('connection', (ws) => {
         }
       }
 
+      // Remove from in-memory when everyone's gone (DB keeps history)
       if (!room.coordinator && totalPresenterCount(room) === 0) {
         rooms.delete(roomId);
       }
@@ -373,9 +384,23 @@ app.get('/api/rooms', (req, res) => {
 });
 
 app.get('/api/rooms/:roomId', (req, res) => {
-  const room = rooms.get(req.params.roomId);
-  if (!room) return res.json({ room: null, sections: [] });
-  res.json({ room: roomSummary(room), sections: sectionsSummary(room) });
+  const { roomId } = req.params;
+  const room = rooms.get(roomId);
+
+  if (room) {
+    return res.json({ room: roomSummary(room), sections: sectionsSummary(room) });
+  }
+
+  // Not in memory — check DB for saved sections
+  const sections = db.getSections(roomId);
+  res.json({ room: null, sections: sections.map(s => ({ ...s, presenterCount: 0 })) });
+});
+
+app.get('/api/rooms/:roomId/history', (req, res) => {
+  const { roomId } = req.params;
+  const { section = 'all' } = req.query;
+  const messages = db.getMessageHistory(roomId, section);
+  res.json({ messages });
 });
 
 // ── Page routes ───────────────────────────────────────────────────────────────
@@ -387,4 +412,5 @@ app.get('/presenter', (req, res) => res.sendFile(path.join(__dirname, 'public', 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Whispering server running at http://localhost:${PORT}`);
+  console.log(`DB: ${require('./database').constructor?.name || 'SQLite'} ready`);
 });
