@@ -268,6 +268,16 @@
     }
     .toast.show { opacity: 1; transform: translateY(0); }
 
+    /* ── Ack notification ── */
+    .ack-notification {
+      position: fixed; top: 1rem; left: 50%; transform: translateX(-50%) translateY(-10px);
+      background: #14532d; border: 1px solid #16a34a; border-radius: 12px;
+      padding: 0.75rem 1.4rem; font-size: 0.95rem; color: #4ade80;
+      opacity: 0; transition: all 0.35s; pointer-events: none; z-index: 2000;
+      font-weight: 700; white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .ack-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 3px; }
 
@@ -451,6 +461,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="ack-notification" id="ackNotification"></div>
 
 <script>
   // ── State ──
@@ -493,6 +504,11 @@
           sections = msg.payload.sections || [];
           renderSections();
           break;
+        case 'message_acked': {
+          const { sectionName } = msg.payload;
+          showAckNotification(sectionName);
+          break;
+        }
         case 'kicked':
           alert(msg.payload.reason);
           location.href = '/';
@@ -770,6 +786,15 @@
   function copyLink(inputId) {
     const el = document.getElementById(inputId);
     navigator.clipboard.writeText(el.value).then(() => showToast('링크 복사됨'));
+  }
+
+  let ackTimer;
+  function showAckNotification(sectionName) {
+    const el = document.getElementById('ackNotification');
+    el.textContent = `✓ ${sectionName || '발표자'}가 메시지를 확인했습니다`;
+    el.classList.add('show');
+    clearTimeout(ackTimer);
+    ackTimer = setTimeout(() => el.classList.remove('show'), 4000);
   }
 
   function showToast(msg) {

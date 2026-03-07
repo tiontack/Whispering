@@ -131,6 +131,12 @@
       transition: all 0.15s;
     }
     .btn-fs:hover { border-color: #0d9488; color: #5eead4; }
+    .btn-lobby {
+      background: transparent; border: 1px solid #2a2a4a; border-radius: 8px;
+      padding: 0.35rem 0.7rem; color: #666; cursor: pointer; font-size: 0.8rem;
+      transition: all 0.15s;
+    }
+    .btn-lobby:hover { border-color: #555; color: #ccc; }
 
     /* ── Main stage ── */
     .stage {
@@ -221,6 +227,22 @@
 
     body.hide-cursor * { cursor: none !important; }
 
+    /* ── Ack button ── */
+    .btn-ack {
+      margin-top: 0.5rem; padding: 0.8rem 2.5rem; border-radius: 14px;
+      border: 2px solid #16a34a; background: #14532d; color: #4ade80;
+      font-size: clamp(1rem,2.5vw,1.4rem); font-weight: 700; cursor: pointer;
+      transition: all 0.2s; animation: ackPulse 1.5s ease-in-out infinite;
+    }
+    .btn-ack:hover { background: #166534; transform: scale(1.05); animation: none; }
+    @keyframes ackPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.4); }
+      50%      { box-shadow: 0 0 0 10px rgba(74,222,128,0); }
+    }
+    .ack-done { color: #4ade80; font-size: 0.9rem; font-weight: 600; opacity: 0.7; margin-top: 0.3rem; }
+    .message-card.urgent.acknowledged  { animation: none; box-shadow: 0 0 20px rgba(220,38,38,0.1); }
+    .message-card.caution.acknowledged { box-shadow: 0 0 20px rgba(217,119,6,0.1); }
+
     /* ── Stage fullscreen button ── */
     .btn-stage-fs {
       position: absolute; bottom: 1.5rem; right: 1.5rem;
@@ -286,6 +308,7 @@
     <span class="session-val" id="sessionDisplay">—</span>
     <div class="conn-dot offline" id="connDot"></div>
     <button class="btn-fs" id="btnFs" onclick="toggleFullscreen()">⛶ 전체화면</button>
+    <button class="btn-lobby" onclick="location.href='/'">← 로비</button>
   </div>
 </div>
 
@@ -310,6 +333,7 @@
   let SECTION_ID   = SEC_ID_INIT;
   let SECTION_NAME = SEC_NM_INIT;
 
+  let messageAcked = false;
   let ws, currentMessage = null, timerState = null, displayMode = 'both';
   let timerInterval, timerSecondsLeft = 0;
   let idleTimer, clockFullInterval;
@@ -457,9 +481,9 @@
           render();
           break;
         case 'message':
-          currentMessage = msg.payload; render(); break;
+          currentMessage = msg.payload; messageAcked = false; render(); break;
         case 'clear_message':
-          currentMessage = null; render(); break;
+          currentMessage = null; messageAcked = false; render(); break;
         case 'timer':
           handleTimer(msg.payload); break;
         case 'clear_timer':
@@ -533,15 +557,27 @@
 
   function buildMessage(msg) {
     const card = document.createElement('div');
-    card.className = `message-card ${msg.urgency} animate`;
+    const needsAck = (msg.urgency === 'caution' || msg.urgency === 'urgent') && !messageAcked;
+    card.className = `message-card ${msg.urgency} animate${messageAcked ? ' acknowledged' : ''}`;
     const labelMap = { normal: '📋 메시지', caution: '⚠️ 주의', urgent: '🚨 긴급' };
     const timeStr  = new Date(msg.timestamp).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
     card.innerHTML = `
       <div class="message-label">${labelMap[msg.urgency] || '메시지'}</div>
       <div class="message-text ${msg.urgency}">${escHtml(msg.text)}</div>
       <div class="message-time">${timeStr} 수신</div>
+      ${needsAck
+        ? '<button class="btn-ack" onclick="ackMessage()">✓ 확인</button>'
+        : (messageAcked && msg.urgency !== 'normal' ? '<div class="ack-done">✓ 확인 완료</div>' : '')}
     `;
     return card;
+  }
+
+  function ackMessage() {
+    messageAcked = true;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'ack_message', roomId: SESSION }));
+    }
+    render();
   }
 
   function buildTimer() {

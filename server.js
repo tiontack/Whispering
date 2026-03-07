@@ -337,6 +337,21 @@ wss.on('connection', (ws) => {
         break;
       }
 
+      // ── Ack message (presenter → coordinator) ──
+      case 'ack_message': {
+        const client = clients.get(ws);
+        if (!client || client.role !== 'presenter') return;
+        const room = rooms.get(client.roomId);
+        if (!room) return;
+        const section = room.sections.get(client.sectionId);
+        const sectionName = section ? section.name : (client.sectionId || '발표자');
+        sendToCoordinator(client.roomId, {
+          type: 'message_acked',
+          payload: { sectionId: client.sectionId, sectionName },
+        });
+        break;
+      }
+
       case 'ping':
         ws.send(JSON.stringify({ type: 'pong' }));
         break;
