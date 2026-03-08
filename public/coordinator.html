@@ -331,7 +331,10 @@
 <body>
 
 <header>
-  <div style="display:flex;align-items:center;gap:0.8rem;">
+  <div style="display:flex;align-items:center;gap:0.7rem;">
+    <img src="/sk-logo.svg" alt="SK"
+      style="height:30px;width:auto;filter:brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(340deg);opacity:0.88;" />
+    <div style="width:1px;height:22px;background:#2a2a4a;flex-shrink:0;"></div>
     <div class="logo">Whispering</div>
     <button class="btn-lobby" onclick="location.href='/'">← 로비</button>
   </div>
@@ -439,12 +442,18 @@
       </div>
 
       <div style="border-top:1px solid #2a2a4a;padding-top:0.7rem;">
-        <div class="panel-title" style="margin-bottom:0.5rem;">발표자 링크 공유</div>
-        <div style="display:flex;gap:0.4rem;margin-bottom:0.4rem;">
-          <input type="text" id="presenterLink" readonly style="flex:1;font-size:0.78rem;color:#888;background:#0f0f1a;border:1px solid #2a2a4a;border-radius:8px;padding:0.45rem 0.7rem;outline:none;" />
-          <button class="btn btn-secondary" style="font-size:0.78rem;padding:0.45rem 0.7rem;" onclick="copyLink('presenterLink')">복사</button>
+        <div class="panel-title" style="margin-bottom:0.6rem;">🔗 링크 공유</div>
+        <div style="display:flex;gap:0.4rem;margin-bottom:0.5rem;">
+          <input type="text" id="presenterLink" readonly style="flex:1;font-size:0.73rem;color:#888;background:#0f0f1a;border:1px solid #2a2a4a;border-radius:8px;padding:0.42rem 0.7rem;outline:none;" />
+          <button class="btn btn-secondary" style="font-size:0.75rem;padding:0.42rem 0.7rem;white-space:nowrap;" onclick="copyLink('presenterLink')" id="copyPresLinkBtn">복사</button>
         </div>
-        <div id="sectionLinks" style="display:flex;flex-direction:column;gap:0.4rem;"></div>
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+          <a id="shareSmsLink" href="#" style="flex:1;min-width:90px;display:flex;align-items:center;justify-content:center;gap:0.3rem;padding:0.5rem 0.6rem;background:#052e1a;border:1px solid #166534;border-radius:8px;color:#4ade80;font-size:0.76rem;font-weight:700;text-decoration:none;transition:all 0.15s;"
+            onmouseover="this.style.background='#073d24'" onmouseout="this.style.background='#052e1a'">📱 문자</a>
+          <a id="shareEmailLink" href="#" style="flex:1;min-width:90px;display:flex;align-items:center;justify-content:center;gap:0.3rem;padding:0.5rem 0.6rem;background:#1e1a08;border:1px solid #713f12;border-radius:8px;color:#fbbf24;font-size:0.76rem;font-weight:700;text-decoration:none;transition:all 0.15s;"
+            onmouseover="this.style.background='#2a2510'" onmouseout="this.style.background='#1e1a08'">✉️ 이메일</a>
+        </div>
+        <div id="sectionLinks" style="display:flex;flex-direction:column;gap:0.4rem;margin-top:0.4rem;"></div>
       </div>
     </div>
 
@@ -514,6 +523,7 @@
   const params    = new URLSearchParams(location.search);
   const SESSION   = params.get('room') || params.get('session') || 'default';
   const ROOM_NAME = params.get('name') || SESSION;
+  const ROOM_PW   = params.get('pw') || '';
 
   let ws;
   let urgency     = 'normal';
@@ -529,8 +539,15 @@
   document.getElementById('sessionCodeDisplay').textContent = SESSION;
   document.getElementById('roomNameDisplay').textContent    = ROOM_NAME;
 
-  const presLink = `${location.origin}/presenter?room=${encodeURIComponent(SESSION)}&name=${encodeURIComponent(ROOM_NAME)}`;
+  const presLink = `${location.origin}/presenter?room=${encodeURIComponent(SESSION)}&name=${encodeURIComponent(ROOM_NAME)}${ROOM_PW ? '&pw=' + encodeURIComponent(ROOM_PW) : ''}`;
   document.getElementById('presenterLink').value = presLink;
+
+  // ── Share links (SMS / Email) ──
+  const smsBody = `[Whispering] ${ROOM_NAME} 방 발표자 참여 링크\n${presLink}`;
+  const emailSubject = `[Whispering] "${ROOM_NAME}" 발표자 링크`;
+  const emailBody = `안녕하세요,\n\nWhispering "${ROOM_NAME}" 방 발표자 접속 링크를 공유합니다.\n\n🖥️ 발표자 링크:\n${presLink}\n\n방 코드: ${SESSION}`;
+  document.getElementById('shareSmsLink').href   = `sms:?body=${encodeURIComponent(smsBody)}`;
+  document.getElementById('shareEmailLink').href = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
 
   // ── WebSocket ──
   function connect() {
@@ -538,7 +555,7 @@
     ws = new WebSocket(`${proto}//${location.host}`);
 
     ws.onopen = () => {
-      ws.send(JSON.stringify({ type: 'join', roomId: SESSION, payload: { role: 'coordinator', name: ROOM_NAME } }));
+      ws.send(JSON.stringify({ type: 'join', roomId: SESSION, payload: { role: 'coordinator', name: ROOM_NAME, password: ROOM_PW } }));
       setStatus(true);
     };
 
@@ -576,6 +593,10 @@
         }
         case 'kicked':
           alert(msg.payload.reason);
+          location.href = '/';
+          break;
+        case 'join_denied':
+          alert(`입장 실패: ${msg.payload.reason}`);
           location.href = '/';
           break;
       }

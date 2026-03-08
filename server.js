@@ -55,10 +55,10 @@ function totalPresenterCount(room) {
 
 // ── Room helpers ─────────────────────────────────────────────────────────────
 
-function getOrCreateRoom(roomId, name) {
+function getOrCreateRoom(roomId, name, password) {
   if (!rooms.has(roomId)) {
     // Try to restore sections from DB
-    db.upsertRoom(roomId, name || roomId);
+    db.upsertRoom(roomId, name || roomId, password);
     const savedSections = db.getSections(roomId);
 
     const sectionsMap = new Map();
@@ -74,6 +74,7 @@ function getOrCreateRoom(roomId, name) {
     rooms.set(roomId, {
       id: roomId,
       name: name || roomId,
+      password: password || null,
       coordinator: null,
       sections: sectionsMap,
       timer: null,
@@ -84,7 +85,7 @@ function getOrCreateRoom(roomId, name) {
     const room = rooms.get(roomId);
     if (room.name !== name) {
       room.name = name;
-      db.upsertRoom(roomId, name);
+      db.upsertRoom(roomId, name, room.password);
     }
   }
   return rooms.get(roomId);
@@ -94,6 +95,7 @@ function roomSummary(room) {
   return {
     id: room.id,
     name: room.name,
+    hasPassword: !!room.password,
     presenterCount: totalPresenterCount(room),
     sectionCount: room.sections.size,
     hasCoordinator: !!room.coordinator,
@@ -173,8 +175,20 @@ wss.on('connection', (ws) => {
 
       // ── Join room ──
       case 'join': {
-        const { role, name, sectionId, sectionName } = payload;
-        const room = getOrCreateRoom(roomId, name);
+        const { role, name, sectionId, sectionName, password } = payload;
+
+        // Password check: if room already exists (in-memory or DB), validate password
+        const existingRoom = rooms.get(roomId);
+        const existingPw = existingRoom
+          ? existingRoom.password
+          : db.getRoomPassword(roomId);
+
+        if (existingPw && password !== existingPw) {
+          ws.send(JSON.stringify({ type: 'join_denied', payload: { reason: '비밀번호가 틀렸습니다.' } }));
+          return;
+        }
+
+        const room = getOrCreateRoom(roomId, name, password || existingPw);
         db.touchRoom(roomId);
 
         if (role === 'coordinator') {

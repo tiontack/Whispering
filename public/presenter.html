@@ -435,7 +435,12 @@
 
 <!-- ── Section picker overlay ── -->
 <div class="picker-overlay" id="pickerOverlay">
-  <div class="picker-logo">Whispering</div>
+  <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.3rem;">
+    <img src="/sk-logo.svg" alt="SK"
+      style="height:28px;width:auto;filter:brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(340deg);opacity:0.85;" />
+    <div style="width:1px;height:20px;background:#2a2a4a;"></div>
+    <div class="picker-logo" style="margin-bottom:0;">Whispering</div>
+  </div>
   <p class="picker-subtitle">분과를 선택하고 입장하세요</p>
 
   <div class="picker-card">
@@ -465,7 +470,10 @@
 
 <!-- ── Presenter UI ── -->
 <div class="topbar" id="topbar">
-  <div style="display:flex;align-items:center;gap:0.7rem;">
+  <div style="display:flex;align-items:center;gap:0.6rem;">
+    <img src="/sk-logo.svg" alt="SK"
+      style="height:24px;width:auto;filter:brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(340deg);opacity:0.85;" />
+    <div style="width:1px;height:18px;background:#2a2a4a;flex-shrink:0;"></div>
     <div class="logo">Whispering</div>
     <span class="session-val" id="roomNameDisplay" style="font-size:0.88rem;color:#e0e0e0;font-weight:700;">—</span>
     <span class="section-tag" id="sectionTagTop"></span>
@@ -529,6 +537,7 @@
   const params      = new URLSearchParams(location.search);
   const SESSION     = params.get('room') || params.get('session') || 'default';
   const ROOM_NAME   = params.get('name') || SESSION;
+  const ROOM_PW     = params.get('pw') || '';
   const SEC_ID_INIT = params.get('section')  || '';
   const SEC_NM_INIT = params.get('sectionName') || SEC_ID_INIT;
 
@@ -668,7 +677,7 @@
     ws.onopen = () => {
       ws.send(JSON.stringify({
         type: 'join', roomId: SESSION,
-        payload: { role: 'presenter', name: ROOM_NAME, sectionId: SECTION_ID, sectionName: SECTION_NAME },
+        payload: { role: 'presenter', name: ROOM_NAME, sectionId: SECTION_ID, sectionName: SECTION_NAME, password: ROOM_PW },
       }));
       setConnected(true);
     };
@@ -703,6 +712,10 @@
             showNotice('담당자가 이 분과를 삭제했습니다. 잠시 후 새로고침됩니다.');
             setTimeout(() => location.reload(), 3000);
           }
+          break;
+        case 'join_denied':
+          alert(`입장 실패: ${msg.payload.reason}`);
+          location.href = '/';
           break;
       }
     };

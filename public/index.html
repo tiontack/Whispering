@@ -21,13 +21,27 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1.1rem 2rem;
+      padding: 0.9rem 2rem;
       border-bottom: 1px solid #1a1a3a;
       flex-shrink: 0;
+      gap: 1rem;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 0.9rem; }
+
+    .sk-logo-img {
+      height: 38px;
+      width: auto;
+      filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(340deg);
+      opacity: 0.92;
+    }
+
+    .header-divider {
+      width: 1px; height: 28px; background: #2a2a4a; flex-shrink: 0;
     }
 
     .logo {
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       font-weight: 800;
       letter-spacing: -0.5px;
       background: linear-gradient(135deg, #0d9488, #5eead4, #60a5fa);
@@ -36,12 +50,12 @@
       background-clip: text;
     }
 
-    .tagline { color: #555; font-size: 0.85rem; }
+    .tagline { color: #555; font-size: 0.82rem; }
 
     /* ── Main layout ── */
     .layout {
       display: grid;
-      grid-template-columns: 360px 1fr;
+      grid-template-columns: 380px 1fr;
       gap: 1.5rem;
       padding: 1.5rem 2rem;
       flex: 1;
@@ -50,6 +64,7 @@
 
     @media (max-width: 750px) {
       .layout { grid-template-columns: 1fr; }
+      header { padding: 0.7rem 1rem; }
     }
 
     /* ── Card ── */
@@ -77,7 +92,7 @@
       margin-bottom: 0.35rem;
     }
 
-    input[type="text"] {
+    input[type="text"], input[type="password"] {
       width: 100%;
       background: #0f0f1a;
       border: 1px solid #2a2a4a;
@@ -89,7 +104,8 @@
       transition: border-color 0.2s;
       margin-bottom: 1rem;
     }
-    input[type="text"]:focus { border-color: #0d9488; }
+    input[type="text"]:focus,
+    input[type="password"]:focus { border-color: #0d9488; }
     input::placeholder { color: #444; }
     input.error { border-color: #ef4444 !important; animation: shake 0.3s ease; }
     @keyframes shake {
@@ -107,6 +123,17 @@
       white-space: nowrap; transition: all 0.2s; flex-shrink: 0;
     }
     .btn-gen:hover { border-color: #0d9488; color: #5eead4; }
+
+    /* ── Password toggle ── */
+    .pw-toggle {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 0.8rem; cursor: pointer; width: fit-content;
+    }
+    .pw-toggle input[type="checkbox"] { width: 15px; height: 15px; accent-color: #0d9488; cursor: pointer; }
+    .pw-toggle span { font-size: 0.8rem; color: #666; }
+
+    .pw-field { display: none; }
+    .pw-field.show { display: block; }
 
     /* ── Role buttons ── */
     .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
@@ -159,24 +186,26 @@
 
     .room-item {
       background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 12px;
-      padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem;
-      transition: all 0.18s; cursor: default;
+      padding: 0.9rem 1.1rem; display: flex; align-items: center; gap: 0.9rem;
+      transition: all 0.18s;
     }
     .room-item:hover { border-color: #3a3a6a; background: #12122a; }
 
-    .room-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .room-icon { font-size: 1.3rem; flex-shrink: 0; }
 
     .room-info { flex: 1; min-width: 0; }
-    .room-name { font-size: 1rem; font-weight: 600; color: #e0e0e0;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .room-meta { font-size: 0.75rem; color: #666; margin-top: 0.2rem; display: flex; gap: 0.8rem; }
+    .room-name {
+      font-size: 0.95rem; font-weight: 600; color: #e0e0e0;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .lock-icon { font-size: 0.75rem; opacity: 0.7; flex-shrink: 0; }
+    .room-meta { font-size: 0.72rem; color: #666; margin-top: 0.18rem; display: flex; gap: 0.7rem; flex-wrap: wrap; }
     .room-stat { display: flex; align-items: center; gap: 0.25rem; }
-    .dot-coord { color: #5eead4; }
-    .dot-pres  { color: #60a5fa; }
 
-    .room-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+    .room-actions { display: flex; gap: 0.35rem; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
     .join-btn {
-      padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.78rem;
+      padding: 0.38rem 0.72rem; border-radius: 8px; font-size: 0.76rem;
       cursor: pointer; border: 1px solid; font-weight: 600; transition: all 0.15s;
       white-space: nowrap;
     }
@@ -184,11 +213,13 @@
     .join-coord:hover { background: #0f3d38; border-color: #0d9488; }
     .join-pres  { background: #0f2027; border-color: #1d4ed8; color: #60a5fa; }
     .join-pres:hover  { background: #1a3a4a; border-color: #3b82f6; }
+    .join-share { background: #1a1a2e; border-color: #3a3a6a; color: #888; }
+    .join-share:hover { border-color: #0d9488; color: #5eead4; }
 
     .room-id-tag {
-      font-size: 0.68rem; color: #444; font-family: monospace;
+      font-size: 0.65rem; color: #444; font-family: monospace;
       background: #0a0a18; border: 1px solid #1a1a3a; border-radius: 4px;
-      padding: 1px 5px; margin-top: 0.15rem; display: inline-block;
+      padding: 1px 4px; margin-top: 0.12rem; display: inline-block;
     }
 
     /* ── Empty state ── */
@@ -199,6 +230,98 @@
     .empty-rooms .icon { font-size: 2.5rem; opacity: 0.4; }
     .empty-rooms p { font-size: 0.85rem; }
 
+    /* ── Password prompt modal ── */
+    .pw-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; padding: 1rem;
+    }
+    .pw-modal-overlay.hidden { display: none; }
+    .pw-modal {
+      background: #1a1a2e; border: 1px solid #3a3a6a; border-radius: 18px;
+      padding: 2rem; width: 100%; max-width: 360px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+    }
+    .pw-modal-title {
+      font-size: 1.05rem; font-weight: 700; color: #e0e0e0; margin-bottom: 0.4rem;
+    }
+    .pw-modal-sub { font-size: 0.82rem; color: #666; margin-bottom: 1.3rem; }
+    .pw-modal input {
+      width: 100%; background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 10px;
+      padding: 0.75rem 0.9rem; color: #e0e0e0; font-size: 1rem; outline: none;
+      margin-bottom: 0.5rem; transition: border-color 0.2s;
+    }
+    .pw-modal input:focus { border-color: #0d9488; }
+    .pw-modal-error { font-size: 0.78rem; color: #f87171; min-height: 1.1rem; margin-bottom: 0.8rem; }
+    .pw-modal-btns { display: flex; gap: 0.6rem; }
+    .btn-pw-confirm {
+      flex: 1; background: #0d9488; border: none; border-radius: 10px;
+      padding: 0.72rem; color: #fff; font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-pw-confirm:hover { background: #14b8a6; }
+    .btn-pw-cancel {
+      background: transparent; border: 1px solid #333; border-radius: 10px;
+      padding: 0.72rem 1rem; color: #888; font-size: 0.9rem; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-pw-cancel:hover { border-color: #555; color: #bbb; }
+
+    /* ── Share modal ── */
+    .share-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; padding: 1rem;
+    }
+    .share-modal-overlay.hidden { display: none; }
+    .share-modal {
+      background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 18px;
+      padding: 1.8rem; width: 100%; max-width: 440px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+    }
+    .share-modal-title {
+      font-size: 1.1rem; font-weight: 800; color: #e0e0e0; margin-bottom: 0.3rem;
+    }
+    .share-modal-sub { font-size: 0.8rem; color: #555; margin-bottom: 1.4rem; }
+    .share-url-block { margin-bottom: 1.1rem; }
+    .share-url-label {
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: #555; font-weight: 700; margin-bottom: 0.35rem;
+    }
+    .share-url-row { display: flex; gap: 0.4rem; align-items: center; }
+    .share-url-box {
+      flex: 1; background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 8px;
+      padding: 0.55rem 0.8rem; font-size: 0.78rem; color: #888; font-family: monospace;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .btn-copy {
+      background: #1e1e3a; border: 1px solid #333; border-radius: 8px;
+      padding: 0.55rem 0.8rem; color: #888; cursor: pointer; font-size: 0.78rem;
+      white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
+    }
+    .btn-copy:hover { border-color: #0d9488; color: #5eead4; }
+    .btn-copy.copied { border-color: #22c55e; color: #22c55e; }
+
+    .share-actions { display: flex; gap: 0.6rem; margin-top: 1.3rem; flex-wrap: wrap; }
+    .btn-share-action {
+      flex: 1; min-width: 110px; display: flex; align-items: center; justify-content: center;
+      gap: 0.45rem; padding: 0.72rem 1rem; border-radius: 10px; font-size: 0.88rem;
+      font-weight: 700; cursor: pointer; border: 1px solid; transition: all 0.15s;
+      text-decoration: none; white-space: nowrap;
+    }
+    .btn-share-sms {
+      background: #052e1a; border-color: #166534; color: #4ade80;
+    }
+    .btn-share-sms:hover { background: #073d24; border-color: #22c55e; }
+    .btn-share-email {
+      background: #1e1a08; border-color: #713f12; color: #fbbf24;
+    }
+    .btn-share-email:hover { background: #2a2510; border-color: #f59e0b; }
+    .btn-share-close {
+      background: transparent; border-color: #333; color: #666;
+    }
+    .btn-share-close:hover { border-color: #555; color: #aaa; }
+
     /* ── Scrollbar ── */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 2px; }
@@ -207,7 +330,11 @@
 <body>
 
 <header>
-  <div class="logo">Whispering</div>
+  <div class="header-left">
+    <img src="/sk-logo.svg" alt="SK" class="sk-logo-img" />
+    <div class="header-divider"></div>
+    <div class="logo">Whispering</div>
+  </div>
   <div class="tagline">강단의 발표자에게, 조용히 메시지를 전달하세요</div>
 </header>
 
@@ -216,7 +343,6 @@
   <!-- Left: Create / Join by code -->
   <div style="display:flex;flex-direction:column;gap:1rem;">
 
-    <!-- Create Room -->
     <div class="card">
       <div class="card-title">방 만들기 / 참여</div>
 
@@ -227,6 +353,15 @@
       <div class="id-row">
         <input type="text" id="roomId" placeholder="예) edu-2025" maxlength="20" />
         <button class="btn-gen" onclick="genId()">랜덤</button>
+      </div>
+
+      <!-- Password optional -->
+      <label class="pw-toggle" onclick="togglePwField()">
+        <input type="checkbox" id="pwCheck" />
+        <span>🔒 비밀번호 설정 (선택)</span>
+      </label>
+      <div class="pw-field" id="pwField">
+        <input type="password" id="roomPassword" placeholder="비밀번호 입력" maxlength="30" autocomplete="new-password" />
       </div>
 
       <div class="divider">역할 선택</div>
@@ -265,23 +400,68 @@
 
 </div>
 
-<script>
-  // ── WebSocket for live room updates ──
-  let ws;
+<!-- ── Password Prompt Modal ── -->
+<div class="pw-modal-overlay hidden" id="pwModal">
+  <div class="pw-modal">
+    <div class="pw-modal-title">🔒 비밀번호 필요</div>
+    <div class="pw-modal-sub" id="pwModalSub">이 방에 입장하려면 비밀번호를 입력하세요.</div>
+    <input type="password" id="pwModalInput" placeholder="비밀번호" maxlength="30"
+      onkeydown="if(event.key==='Enter') confirmPwModal()" autocomplete="current-password" />
+    <div class="pw-modal-error" id="pwModalError"></div>
+    <div class="pw-modal-btns">
+      <button class="btn-pw-cancel" onclick="closePwModal()">취소</button>
+      <button class="btn-pw-confirm" onclick="confirmPwModal()">입장하기</button>
+    </div>
+  </div>
+</div>
 
+<!-- ── Share Modal ── -->
+<div class="share-modal-overlay hidden" id="shareModal">
+  <div class="share-modal">
+    <div class="share-modal-title">🔗 방 링크 공유</div>
+    <div class="share-modal-sub" id="shareModalSub">—</div>
+
+    <div class="share-url-block">
+      <div class="share-url-label">🎛️ 담당자 링크</div>
+      <div class="share-url-row">
+        <div class="share-url-box" id="shareCoordUrl">—</div>
+        <button class="btn-copy" id="copyCoordBtn" onclick="copyUrl('coord')">복사</button>
+      </div>
+    </div>
+
+    <div class="share-url-block">
+      <div class="share-url-label">🖥️ 발표자 링크</div>
+      <div class="share-url-row">
+        <div class="share-url-box" id="sharePresUrl">—</div>
+        <button class="btn-copy" id="copyPresBtn" onclick="copyUrl('pres')">복사</button>
+      </div>
+    </div>
+
+    <div class="share-actions">
+      <a class="btn-share-action btn-share-sms" id="shareSmsBtn" href="#">
+        📱 문자로 보내기
+      </a>
+      <a class="btn-share-action btn-share-email" id="shareEmailBtn" href="#">
+        ✉️ 이메일로 보내기
+      </a>
+      <button class="btn-share-action btn-share-close" onclick="closeShareModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let ws;
+  let _pendingJoin = null; // { id, name, role } — waiting for password
+
+  // ── WebSocket ──
   function connectLobby() {
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
     ws = new WebSocket(`${proto}//${location.host}`);
-
-    ws.onopen = () => {
-      ws.send(JSON.stringify({ type: 'lobby_join' }));
-    };
-
+    ws.onopen = () => ws.send(JSON.stringify({ type: 'lobby_join' }));
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
       if (msg.type === 'room_list') renderRooms(msg.payload.rooms);
     };
-
     ws.onclose = () => setTimeout(connectLobby, 3000);
     ws.onerror = () => ws.close();
   }
@@ -298,67 +478,176 @@
         </div>`;
       return;
     }
-
     grid.innerHTML = roomList
       .sort((a, b) => b.createdAt - a.createdAt)
       .map(r => `
         <div class="room-item">
           <div class="room-icon">${r.hasCoordinator ? '🟢' : '⚫'}</div>
           <div class="room-info">
-            <div class="room-name">${escHtml(r.name)}</div>
+            <div class="room-name">
+              ${escHtml(r.name)}
+              ${r.hasPassword ? '<span class="lock-icon">🔒</span>' : ''}
+            </div>
             <div class="room-meta">
-              <span class="room-stat">
-                <span class="dot-coord">🎛️</span>
-                ${r.hasCoordinator ? '담당자 접속' : '담당자 없음'}
-              </span>
-              <span class="room-stat">
-                <span class="dot-pres">🖥️</span>
-                발표자 ${r.presenterCount}명
-              </span>
+              <span class="room-stat">🎛️ ${r.hasCoordinator ? '담당자 접속' : '담당자 없음'}</span>
+              <span class="room-stat">🖥️ 발표자 ${r.presenterCount}명</span>
             </div>
             <span class="room-id-tag">${escHtml(r.id)}</span>
           </div>
           <div class="room-actions">
-            <button class="join-btn join-coord" onclick="joinRoom('${escAttr(r.id)}', '${escAttr(r.name)}', 'coordinator')">입장 (담당)</button>
-            <button class="join-btn join-pres"  onclick="joinRoom('${escAttr(r.id)}', '${escAttr(r.name)}', 'presenter')">입장 (발표)</button>
+            <button class="join-btn join-coord"
+              onclick="joinRoom('${escAttr(r.id)}', '${escAttr(r.name)}', 'coordinator', ${r.hasPassword})">담당</button>
+            <button class="join-btn join-pres"
+              onclick="joinRoom('${escAttr(r.id)}', '${escAttr(r.name)}', 'presenter', ${r.hasPassword})">발표</button>
+            <button class="join-btn join-share"
+              onclick="openShareModal('${escAttr(r.id)}', '${escAttr(r.name)}')">🔗</button>
           </div>
         </div>
       `).join('');
+  }
+
+  // ── Password field toggle ──
+  function togglePwField() {
+    const cb = document.getElementById('pwCheck');
+    const field = document.getElementById('pwField');
+    // Slight delay so checkbox state updates first
+    setTimeout(() => {
+      field.classList.toggle('show', cb.checked);
+      if (!cb.checked) document.getElementById('roomPassword').value = '';
+    }, 0);
   }
 
   // ── Navigation ──
   function genId() {
     const words = ['edu', 'class', 'lecture', 'seminar', 'talk', 'meet'];
     const nums  = Math.floor(1000 + Math.random() * 9000);
-    const word  = words[Math.floor(Math.random() * words.length)];
-    document.getElementById('roomId').value = `${word}-${nums}`;
+    document.getElementById('roomId').value =
+      `${words[Math.floor(Math.random() * words.length)]}-${nums}`;
   }
 
   function go(role) {
+    let id   = document.getElementById('roomId').value.trim();
     const name = document.getElementById('roomName').value.trim();
-    let id     = document.getElementById('roomId').value.trim();
+    const pw   = document.getElementById('pwCheck').checked
+      ? document.getElementById('roomPassword').value.trim()
+      : '';
 
     if (!id) {
-      // auto-generate if empty
       const words = ['edu','class','lecture','seminar'];
       id = words[Math.floor(Math.random() * words.length)] + '-' + Math.floor(1000 + Math.random() * 9000);
       document.getElementById('roomId').value = id;
     }
-
-    const roomName = name || id;
-    navigate(id, roomName, role);
+    navigate(id, name || id, role, pw);
   }
 
-  function joinRoom(id, name, role) {
+  function joinRoom(id, name, role, hasPassword) {
     document.getElementById('roomId').value   = id;
     document.getElementById('roomName').value = name;
-    navigate(id, name, role);
+    if (hasPassword) {
+      openPwModal(id, name, role);
+    } else {
+      navigate(id, name, role, '');
+    }
   }
 
-  function navigate(id, name, role) {
+  function navigate(id, name, role, password) {
     const params = new URLSearchParams({ room: id, name });
+    if (password) params.set('pw', password);
     window.location.href = `/${role}?${params}`;
   }
+
+  // ── Password modal ──
+  function openPwModal(id, name, role) {
+    _pendingJoin = { id, name, role };
+    document.getElementById('pwModalSub').textContent = `"${name}" 방에 입장하려면 비밀번호를 입력하세요.`;
+    document.getElementById('pwModalInput').value = '';
+    document.getElementById('pwModalError').textContent = '';
+    document.getElementById('pwModal').classList.remove('hidden');
+    setTimeout(() => document.getElementById('pwModalInput').focus(), 100);
+  }
+
+  function closePwModal() {
+    document.getElementById('pwModal').classList.add('hidden');
+    _pendingJoin = null;
+  }
+
+  function confirmPwModal() {
+    if (!_pendingJoin) return;
+    const pw = document.getElementById('pwModalInput').value.trim();
+    if (!pw) {
+      document.getElementById('pwModalError').textContent = '비밀번호를 입력해주세요.';
+      return;
+    }
+    const { id, name, role } = _pendingJoin;
+    closePwModal();
+    navigate(id, name, role, pw);
+  }
+
+  // ── Share modal ──
+  let _shareData = null;
+
+  function openShareModal(id, name) {
+    _shareData = { id, name };
+    const base = `${location.protocol}//${location.host}`;
+    const coordUrl = `${base}/coordinator?room=${encodeURIComponent(id)}&name=${encodeURIComponent(name)}`;
+    const presUrl  = `${base}/presenter?room=${encodeURIComponent(id)}&name=${encodeURIComponent(name)}`;
+
+    document.getElementById('shareModalSub').textContent = `방 코드: ${id}`;
+    document.getElementById('shareCoordUrl').textContent = coordUrl;
+    document.getElementById('sharePresUrl').textContent  = presUrl;
+
+    const smsBody = `[Whispering] ${name} 방 참여 링크\n담당자: ${coordUrl}\n발표자: ${presUrl}`;
+    const emailSubject = `[Whispering] "${name}" 방 참여 링크`;
+    const emailBody = `안녕하세요,\n\nWhispering "${name}" 방 접속 링크를 공유합니다.\n\n🎛️ 담당자 링크:\n${coordUrl}\n\n🖥️ 발표자 링크:\n${presUrl}\n\n방 코드: ${id}`;
+
+    document.getElementById('shareSmsBtn').href =
+      `sms:?body=${encodeURIComponent(smsBody)}`;
+    document.getElementById('shareEmailBtn').href =
+      `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+
+    // Reset copy buttons
+    ['copyCoordBtn','copyPresBtn'].forEach(id => {
+      const btn = document.getElementById(id);
+      btn.textContent = '복사';
+      btn.classList.remove('copied');
+    });
+
+    document.getElementById('shareModal').classList.remove('hidden');
+  }
+
+  function closeShareModal() {
+    document.getElementById('shareModal').classList.add('hidden');
+    _shareData = null;
+  }
+
+  function copyUrl(type) {
+    const elId  = type === 'coord' ? 'shareCoordUrl' : 'sharePresUrl';
+    const btnId = type === 'coord' ? 'copyCoordBtn'  : 'copyPresBtn';
+    const url = document.getElementById(elId).textContent;
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById(btnId);
+      btn.textContent = '✓ 복사됨';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      // Fallback for older browsers
+      const ta = document.createElement('textarea');
+      ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      const btn = document.getElementById(btnId);
+      btn.textContent = '✓ 복사됨'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // Close modals on backdrop click
+  document.getElementById('pwModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('pwModal')) closePwModal();
+  });
+  document.getElementById('shareModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('shareModal')) closeShareModal();
+  });
 
   // ── Utils ──
   function escHtml(s) {
@@ -368,9 +657,14 @@
     return String(s).replace(/'/g, "\\'").replace(/"/g, '\\"');
   }
 
-  // Enter key shortcut
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && e.target.tagName === 'INPUT') go('coordinator');
+    if (e.key === 'Escape') { closePwModal(); closeShareModal(); }
+    if (e.key === 'Enter' && e.target.tagName === 'INPUT' &&
+        !document.getElementById('pwModal').classList.contains('hidden')) {
+      confirmPwModal();
+    } else if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+      go('coordinator');
+    }
   });
 
   connectLobby();

@@ -13,12 +13,18 @@ const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
+// ── Migrations (safe ALTER TABLE for existing DBs) ────────────────────────
+try {
+  db.exec(`ALTER TABLE rooms ADD COLUMN password TEXT`);
+} catch (e) { /* column already exists */ }
+
 // ── Schema ─────────────────────────────────────────────────────────────────
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS rooms (
     id         TEXT PRIMARY KEY,
     name       TEXT NOT NULL,
+    password   TEXT,
     created_at INTEGER NOT NULL DEFAULT (unixepoch()),
     last_active INTEGER NOT NULL DEFAULT (unixepoch())
   );
@@ -59,10 +65,14 @@ db.exec(`
 
 const stmts = {
   upsertRoom: db.prepare(`
-    INSERT INTO rooms (id, name, created_at, last_active)
-    VALUES (@id, @name, unixepoch(), unixepoch())
-    ON CONFLICT(id) DO UPDATE SET name = @name, last_active = unixepoch()
+    INSERT INTO rooms (id, name, password, created_at, last_active)
+    VALUES (@id, @name, @password, unixepoch(), unixepoch())
+    ON CONFLICT(id) DO UPDATE SET name = @name,
+      password = COALESCE(@password, password),
+      last_active = unixepoch()
   `),
+
+  getPassword: db.prepare(`SELECT password FROM rooms WHERE id = ?`),
 
   touchRoom: db.prepare(`
     UPDATE rooms SET last_active = unixepoch() WHERE id = ?
@@ -128,8 +138,13 @@ const stmts = {
 
 // ── Exported API ──────────────────────────────────────────────────────────────
 
-function upsertRoom(id, name) {
-  stmts.upsertRoom.run({ id, name });
+function upsertRoom(id, name, password) {
+  stmts.upsertRoom.run({ id, name, password: password || null });
+}
+
+function getRoomPassword(id) {
+  const row = stmts.getPassword.get(id);
+  return row ? row.password : null;
 }
 
 function touchRoom(id) {
@@ -232,6 +247,7 @@ setInterval(runCleanup, 24 * 60 * 60 * 1000);
 module.exports = {
   upsertRoom,
   touchRoom,
+  getRoomPassword,
   upsertSection,
   renameSection,
   deleteSection,
