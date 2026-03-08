@@ -32,8 +32,6 @@
     .sk-logo-img {
       height: 38px;
       width: auto;
-      filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(340deg);
-      opacity: 0.92;
     }
 
     .header-divider {
@@ -598,7 +596,7 @@
 
     const smsBody = `[Whispering] ${name} 방 참여 링크\n담당자: ${coordUrl}\n발표자: ${presUrl}`;
     const emailSubject = `[Whispering] "${name}" 방 참여 링크`;
-    const emailBody = `안녕하세요,\n\nWhispering "${name}" 방 접속 링크를 공유합니다.\n\n🎛️ 담당자 링크:\n${coordUrl}\n\n🖥️ 발표자 링크:\n${presUrl}\n\n방 코드: ${id}`;
+    const emailBody = `안녕하세요,\n\nWhispering "${name}" 방 접속 링크를 공유합니다.\n\n🎛️ 담당자 링크:\n${coordUrl}\n\n🖥️ 발표자 링크:\n${presUrl}\n\n방 코드: ${id}\n\n\n※ 본 메시지는 발신 전용입니다. 이 메일에 회신하지 마세요.`;
 
     document.getElementById('shareSmsBtn').href =
       `sms:?body=${encodeURIComponent(smsBody)}`;

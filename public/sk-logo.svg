@@ -1,16 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 256">
-  <!-- SK Group Skybolt Symbol (approximate recreation) -->
+  <!-- SK Group Skybolt Symbol -->
 
   <!-- Orange upper-left blade -->
-  <path d="M 148,76 C 145,56 140,32 128,6 L 156,2 C 162,28 168,54 174,72 Z" fill="#F47920"/>
-  <!-- White gap between upper orange and red -->
-  <path d="M 174,72 C 168,54 162,28 156,2 L 164,2 C 170,26 177,52 182,70 Z" fill="white"/>
-  <!-- Red main body (largest section) -->
-  <path d="M 182,70 C 170,26 164,2 164,2 L 285,68 C 280,86 268,110 248,134 Z" fill="#C8102E"/>
-  <!-- White gap between red and lower orange -->
-  <path d="M 248,134 L 285,68 L 289,74 L 253,140 Z" fill="white"/>
+  <path d="M 148,76 C 145,56 140,32 128,6 L 156,2 C 162,28 168,54 174,72 Z"
+    fill="#F47920" stroke="#0f0f1a" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Red main body -->
+  <path d="M 174,72 C 164,28 164,2 164,2 L 285,68 C 280,86 268,110 248,134 Z"
+    fill="#C8102E" stroke="#0f0f1a" stroke-width="3" stroke-linejoin="round"/>
   <!-- Orange lower-right blade -->
-  <path d="M 253,140 C 262,120 278,90 289,74 C 292,100 290,124 280,148 C 268,150 258,146 253,140 Z" fill="#F47920"/>
+  <path d="M 248,134 C 262,112 278,88 289,74 C 292,100 290,126 280,148 C 268,150 258,146 248,140 Z"
+    fill="#F47920" stroke="#0f0f1a" stroke-width="3" stroke-linejoin="round"/>
 
   <!-- SK text -->
   <text x="2" y="252"

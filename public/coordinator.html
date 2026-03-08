@@ -332,8 +332,7 @@
 
 <header>
   <div style="display:flex;align-items:center;gap:0.7rem;">
-    <img src="/sk-logo.svg" alt="SK"
-      style="height:30px;width:auto;filter:brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(340deg);opacity:0.88;" />
+    <img src="/sk-logo.svg" alt="SK" style="height:30px;width:auto;" />
     <div style="width:1px;height:22px;background:#2a2a4a;flex-shrink:0;"></div>
     <div class="logo">Whispering</div>
     <button class="btn-lobby" onclick="location.href='/'">← 로비</button>
@@ -545,7 +544,7 @@
   // ── Share links (SMS / Email) ──
   const smsBody = `[Whispering] ${ROOM_NAME} 방 발표자 참여 링크\n${presLink}`;
   const emailSubject = `[Whispering] "${ROOM_NAME}" 발표자 링크`;
-  const emailBody = `안녕하세요,\n\nWhispering "${ROOM_NAME}" 방 발표자 접속 링크를 공유합니다.\n\n🖥️ 발표자 링크:\n${presLink}\n\n방 코드: ${SESSION}`;
+  const emailBody = `안녕하세요,\n\nWhispering "${ROOM_NAME}" 방 발표자 접속 링크를 공유합니다.\n\n🖥️ 발표자 링크:\n${presLink}\n\n방 코드: ${SESSION}\n\n\n※ 본 메시지는 발신 전용입니다. 이 메일에 회신하지 마세요.`;
   document.getElementById('shareSmsLink').href   = `sms:?body=${encodeURIComponent(smsBody)}`;
   document.getElementById('shareEmailLink').href = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
 
