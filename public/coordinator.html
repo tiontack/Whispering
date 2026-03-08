@@ -322,8 +322,6 @@
       .logo { font-size: 1.1rem; }
       .session-info { gap: 0.3rem; }
       .btn-lobby { padding: 0.25rem 0.5rem; font-size: 0.72rem; }
-      .tabs { overflow-x: auto; }
-      .tab { white-space: nowrap; font-size: 0.78rem; padding: 0.38rem 0.7rem; }
       textarea { min-height: 80px; font-size: 0.95rem; }
       .timer-custom input[type="number"] { width: 52px; }
       .ack-notification { font-size: 0.85rem; padding: 0.6rem 1rem; white-space: normal; max-width: 90vw; text-align: center; }
@@ -350,21 +348,12 @@
 
 <div class="layout">
 
-  <!-- Left main panel -->
-  <div style="display:flex;flex-direction:column;gap:0.9rem;">
+  <!-- Left main panel (단일 페이지 — 탭 없음) -->
+  <div style="display:flex;flex-direction:column;gap:0.9rem;overflow-y:auto;">
 
-    <!-- Tabs -->
-    <div class="panel" style="padding:0.7rem 1rem;gap:0;">
-      <div class="tabs">
-        <button class="tab active" onclick="switchTab('message')">✉️ 메시지</button>
-        <button class="tab" onclick="switchTab('timer')">⏱️ 타이머</button>
-        <button class="tab" onclick="switchTab('display')">🖥️ 화면 설정</button>
-      </div>
-    </div>
-
-    <!-- Message Tab -->
-    <div class="panel" id="tab-message">
-      <div class="panel-title">메시지 보내기</div>
+    <!-- ── 메시지 보내기 ── -->
+    <div class="panel">
+      <div class="panel-title">✉️ 메시지 보내기</div>
 
       <!-- Target selector -->
       <div>
@@ -390,6 +379,8 @@
         <div class="btn-row">
           <button class="btn btn-primary" onclick="sendMessage()">전송 ↵</button>
           <button class="btn btn-secondary" onclick="clearMessage()">지우기</button>
+          <button class="btn btn-secondary" onclick="clearAllMessages()" title="현재 표시 대상 관계없이 모든 분과 메시지 삭제"
+            style="white-space:nowrap;border-color:#450a0a;color:#f87171;" >🗑 전체 내리기</button>
         </div>
       </div>
 
@@ -402,9 +393,9 @@
       </div>
     </div>
 
-    <!-- Timer Tab -->
-    <div class="panel" id="tab-timer" style="display:none;">
-      <div class="panel-title">타이머 제어 (전체 공유)</div>
+    <!-- ── 타이머 ── -->
+    <div class="panel">
+      <div class="panel-title">⏱️ 타이머 제어 (전체 공유)</div>
       <div class="timer-section">
         <div>
           <div class="panel-title" style="margin-bottom:0.5rem;">빠른 설정</div>
@@ -437,9 +428,9 @@
       </div>
     </div>
 
-    <!-- Display Tab -->
-    <div class="panel" id="tab-display" style="display:none;">
-      <div class="panel-title">발표자 화면 표시 설정</div>
+    <!-- ── 화면 설정 ── -->
+    <div class="panel">
+      <div class="panel-title">🖥️ 발표자 화면 표시 설정</div>
       <div class="display-options">
         <button class="display-btn active" id="dm-both"    onclick="setDisplayMode('both')">    <span>📋</span> 메시지 + 타이머 (기본)</button>
         <button class="display-btn"        id="dm-message" onclick="setDisplayMode('message')"> <span>✉️</span> 메시지만 표시</button>
@@ -603,14 +594,15 @@
     if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ ...data, roomId: SESSION }));
   }
 
-  // ── Tabs ──
-  function switchTab(tab) {
-    ['message', 'timer', 'display'].forEach(t => {
-      document.getElementById(`tab-${t}`).style.display = t === tab ? 'flex' : 'none';
-    });
-    document.querySelectorAll('.tab').forEach((el, i) => {
-      el.classList.toggle('active', ['message','timer','display'][i] === tab);
-    });
+  // ── Clear all messages (전체 분과 메시지 일괄 삭제) ──
+  function clearAllMessages() {
+    send({ type: 'clear_message', payload: { target: 'all' } });
+    updatePreview(null, null);
+    document.getElementById('msgInput').value = '';
+    updateCharCount();
+    ackedSections.clear();
+    renderSections();
+    showToast('모든 분과 메시지 내림');
   }
 
   // ── Sections ──

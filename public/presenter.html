@@ -175,13 +175,22 @@
       display: flex; flex-direction: column; align-items: center;
       gap: 1rem; position: relative; overflow: hidden;
     }
-    .message-card.normal  { background: linear-gradient(135deg,#1a1a35,#1e1e4a); border: 2px solid #3b3b7a; box-shadow: 0 0 40px rgba(100,100,255,0.1); }
-    .message-card.caution { background: linear-gradient(135deg,#2a1a00,#3a2200); border: 2px solid #d97706; box-shadow: 0 0 40px rgba(217,119,6,0.2); }
-    .message-card.urgent  { background: linear-gradient(135deg,#2a0000,#3a0000); border: 2px solid #dc2626; box-shadow: 0 0 40px rgba(220,38,38,0.3); animation: urgentPulse 2s ease-in-out infinite; }
+    /* 일반: 초록 계열, 애니메이션 없음 */
+    .message-card.normal  { background: linear-gradient(135deg,#071a10,#0d2418); border: 2px solid #16a34a; box-shadow: 0 0 40px rgba(22,163,74,0.15); }
+    /* 주의: 깜빡임 — 확인 전까지 */
+    .message-card.caution { background: linear-gradient(135deg,#2a1a00,#3a2200); border: 2px solid #d97706; animation: cautionBlink 1s ease-in-out infinite; }
+    .message-card.caution.acknowledged { animation: none; box-shadow: 0 0 20px rgba(217,119,6,0.1); }
+    /* 긴급: 깜빡임 + 빨간 색상 강조 — 확인 전까지 */
+    .message-card.urgent  { background: linear-gradient(135deg,#2a0000,#3a0000); border: 2px solid #dc2626; animation: urgentFlash 1.2s ease-in-out infinite; }
+    .message-card.urgent.acknowledged  { animation: none; box-shadow: 0 0 20px rgba(220,38,38,0.1); }
 
-    @keyframes urgentPulse {
-      0%,100% { box-shadow: 0 0 40px rgba(220,38,38,0.3); }
-      50%      { box-shadow: 0 0 80px rgba(220,38,38,0.6); }
+    @keyframes cautionBlink {
+      0%,100% { opacity: 1; box-shadow: 0 0 40px rgba(217,119,6,0.35); }
+      50%      { opacity: 0.68; box-shadow: 0 0 10px rgba(217,119,6,0.08); }
+    }
+    @keyframes urgentFlash {
+      0%,100% { box-shadow: 0 0 40px rgba(220,38,38,0.35); border-color: #dc2626; background: linear-gradient(135deg,#2a0000,#3a0000); opacity: 1; }
+      50%      { box-shadow: 0 0 100px rgba(255,0,0,0.9), 0 0 50px rgba(255,60,60,0.5); border-color: #ff3333; background: linear-gradient(135deg,#560000,#720000); opacity: 0.88; }
     }
 
     .message-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 600; opacity: 0.6; }
@@ -237,14 +246,54 @@
     /* ── PWA 설치 안내 배너 ── */
     .pwa-banner {
       position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: rgba(15,15,30,0.95); border: 1px solid #0d9488; border-radius: 12px;
-      padding: 0.7rem 1.2rem; font-size: 0.82rem; color: #5eead4; font-weight: 600;
+      background: rgba(4,47,46,0.97); border: 1px solid #0d9488; border-radius: 14px;
+      padding: 0.75rem 1rem; font-size: 0.82rem; color: #5eead4;
       opacity: 0; transition: all 0.4s; pointer-events: none; z-index: 50;
-      white-space: nowrap; backdrop-filter: blur(8px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap;
+      backdrop-filter: blur(10px); box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+      max-width: calc(100vw - 2rem);
     }
     .pwa-banner.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
-    @media (max-width: 480px) { .pwa-banner { white-space: normal; max-width: 85vw; text-align: center; } }
+    .btn-pwa-install {
+      background: #0d9488; border: none; border-radius: 8px;
+      padding: 0.45rem 1rem; color: #fff; font-size: 0.82rem; font-weight: 700;
+      cursor: pointer; white-space: nowrap; transition: background 0.15s;
+    }
+    .btn-pwa-install:hover { background: #14b8a6; }
+    .btn-pwa-close {
+      background: none; border: none; color: #5eead4; cursor: pointer;
+      font-size: 1rem; padding: 0.1rem; line-height: 1; margin-left: auto;
+    }
+
+    /* ── iOS 설치 가이드 모달 ── */
+    .ios-guide {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+      display: flex; align-items: flex-end; justify-content: center;
+      z-index: 200; transition: opacity 0.3s;
+    }
+    .ios-guide.hidden { display: none; }
+    .ios-guide-box {
+      background: #1a1a2e; border: 1px solid #0d9488; border-radius: 20px 20px 0 0;
+      padding: 1.5rem 1.5rem 2.5rem; width: 100%; max-width: 480px;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .ios-guide-title { font-size: 1.1rem; font-weight: 800; color: #5eead4; margin-bottom: 1rem; text-align: center; }
+    .ios-steps { list-style: none; display: flex; flex-direction: column; gap: 0.9rem; margin-bottom: 1.3rem; }
+    .ios-steps li {
+      display: flex; align-items: flex-start; gap: 0.8rem;
+      background: #0f0f1a; border-radius: 10px; padding: 0.7rem 0.9rem; font-size: 0.9rem; color: #ccc;
+    }
+    .ios-steps li .step-num {
+      background: #0d9488; color: #fff; border-radius: 50%;
+      width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 800; flex-shrink: 0;
+    }
+    .ios-steps li strong { color: #5eead4; }
+    .btn-ios-close {
+      width: 100%; padding: 0.75rem; border-radius: 10px; border: 1px solid #2a2a4a;
+      background: transparent; color: #888; font-size: 0.9rem; cursor: pointer;
+    }
 
     /* ── Ack button ── */
     .btn-ack {
@@ -259,8 +308,7 @@
       50%      { box-shadow: 0 0 0 10px rgba(74,222,128,0); }
     }
     .ack-done { color: #4ade80; font-size: 0.9rem; font-weight: 600; opacity: 0.7; margin-top: 0.3rem; }
-    .message-card.urgent.acknowledged  { animation: none; box-shadow: 0 0 20px rgba(220,38,38,0.1); }
-    .message-card.caution.acknowledged { box-shadow: 0 0 20px rgba(217,119,6,0.1); }
+    /* acknowledged 스타일은 각 urgency 블록에 포함됨 */
 
     /* ── Stage fullscreen button ── */
     .btn-stage-fs {
@@ -447,10 +495,33 @@
 
 <div class="offline-banner" id="offlineBanner">⚠️ 연결이 끊어졌습니다. 재연결 중…</div>
 <div class="notice-banner" id="noticeBanner"></div>
-<!-- PWA 홈 화면 추가 안내 배너 -->
+<!-- PWA 설치 배너 -->
 <div class="pwa-banner" id="pwaBanner">
-  📲 완전한 전체화면을 원하시면 홈 화면에 추가하세요
-  <button onclick="document.getElementById('pwaBanner').classList.remove('show')" style="background:none;border:none;color:inherit;cursor:pointer;font-size:1rem;margin-left:0.5rem;">✕</button>
+  <span>📲 완전한 전체화면</span>
+  <button class="btn-pwa-install" id="btnPwaInstall" onclick="triggerPwaInstall()">홈 화면에 추가</button>
+  <button class="btn-pwa-close" onclick="document.getElementById('pwaBanner').classList.remove('show')">✕</button>
+</div>
+
+<!-- iOS 설치 가이드 모달 -->
+<div class="ios-guide hidden" id="iosGuide">
+  <div class="ios-guide-box">
+    <div class="ios-guide-title">📲 홈 화면에 추가하는 방법</div>
+    <ol class="ios-steps">
+      <li>
+        <span class="step-num">1</span>
+        <span>Safari 하단 가운데 <strong>공유 버튼 ↑</strong>을 탭하세요</span>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <span>메뉴를 아래로 스크롤해서 <strong>'홈 화면에 추가'</strong>를 탭하세요</span>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <span>오른쪽 상단 <strong>'추가'</strong>를 탭하면 완료! 앱처럼 전체화면으로 실행됩니다</span>
+      </li>
+    </ol>
+    <button class="btn-ios-close" onclick="document.getElementById('iosGuide').classList.add('hidden')">닫기</button>
+  </div>
 </div>
 
 <script>
@@ -920,21 +991,55 @@
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
 
-  // ── PWA 홈 화면 추가 안내 (모바일 브라우저에서만, 이미 standalone이면 숨김) ──
-  (function checkPwa() {
-    const isStandalone =
-      window.matchMedia('(display-mode: fullscreen)').matches ||
-      window.matchMedia('(display-mode: standalone)').matches ||
-      window.navigator.standalone;
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (!isStandalone && isMobile) {
-      const banner = document.getElementById('pwaBanner');
-      if (banner) {
-        setTimeout(() => banner.classList.add('show'), 2000);
-        setTimeout(() => banner.classList.remove('show'), 8000);
-      }
+  // ── PWA 설치 자동화 ──
+  let _deferredInstall = null;
+  const isStandalone =
+    window.matchMedia('(display-mode: fullscreen)').matches ||
+    window.matchMedia('(display-mode: standalone)').matches ||
+    !!window.navigator.standalone;
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  // Android Chrome: 설치 프롬프트 이벤트 캡처
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    _deferredInstall = e;
+    if (!isStandalone) showPwaBanner();
+  });
+
+  window.addEventListener('appinstalled', () => {
+    _deferredInstall = null;
+    document.getElementById('pwaBanner').classList.remove('show');
+  });
+
+  function triggerPwaInstall() {
+    if (_deferredInstall) {
+      // Android Chrome: 네이티브 설치 다이얼로그 실행 (완전 자동화)
+      _deferredInstall.prompt();
+      _deferredInstall.userChoice.then(() => { _deferredInstall = null; });
+      document.getElementById('pwaBanner').classList.remove('show');
+    } else if (isIOS) {
+      // iOS Safari: 단계별 안내 모달 표시
+      document.getElementById('iosGuide').classList.remove('hidden');
     }
-  })();
+  }
+
+  function showPwaBanner() {
+    const banner = document.getElementById('pwaBanner');
+    if (!banner) return;
+    // iOS는 Safari에서만 설치 가능
+    if (isIOS && !/Safari/.test(navigator.userAgent)) return;
+    setTimeout(() => banner.classList.add('show'), 1500);
+    setTimeout(() => banner.classList.remove('show'), 10000);
+  }
+
+  // iOS: 모바일이고 standalone 아니면 배너 표시 (beforeinstallprompt 없으므로 수동 트리거)
+  if (!isStandalone && isIOS) showPwaBanner();
+  // 기타 모바일(Android but no prompt yet)
+  else if (!isStandalone && isMobile && !isIOS) {
+    // beforeinstallprompt를 기다림, 없으면 3초 후 배너 (가이드 용도)
+    setTimeout(() => { if (!_deferredInstall) showPwaBanner(); }, 3000);
+  }
 
   // ── Init ──
   loadPresenterPresets();
