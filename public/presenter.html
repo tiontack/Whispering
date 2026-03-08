@@ -2,8 +2,15 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Whispering – 발표자 화면</title>
+  <!-- PWA: 홈 화면 추가 시 전체화면으로 실행 -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-title" content="Whispering" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <meta name="theme-color" content="#050510" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -227,6 +234,18 @@
 
     body.hide-cursor * { cursor: none !important; }
 
+    /* ── PWA 설치 안내 배너 ── */
+    .pwa-banner {
+      position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: rgba(15,15,30,0.95); border: 1px solid #0d9488; border-radius: 12px;
+      padding: 0.7rem 1.2rem; font-size: 0.82rem; color: #5eead4; font-weight: 600;
+      opacity: 0; transition: all 0.4s; pointer-events: none; z-index: 50;
+      white-space: nowrap; backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .pwa-banner.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+    @media (max-width: 480px) { .pwa-banner { white-space: normal; max-width: 85vw; text-align: center; } }
+
     /* ── Ack button ── */
     .btn-ack {
       margin-top: 0.5rem; padding: 0.8rem 2.5rem; border-radius: 14px;
@@ -422,19 +441,17 @@
   <button class="btn-quick-msg" id="btnQuickMsg" onclick="toggleQuickPanel()">💬 담당자에게</button>
   <div class="quick-msg-panel hidden" id="quickPanel">
     <div class="qp-title">담당자에게 전달</div>
-    <button class="qp-btn" onclick="sendPresenterMsg('✋ 잠깐 멈춰주세요')">✋ 잠깐 멈춰주세요</button>
-    <button class="qp-btn" onclick="sendPresenterMsg('👍 준비됐습니다')">👍 준비됐습니다</button>
-    <button class="qp-btn" onclick="sendPresenterMsg('❓ 메시지를 못 봤어요')">❓ 메시지를 못 봤어요</button>
-    <button class="qp-btn" onclick="sendPresenterMsg('🔊 잘 안들립니다')">🔊 잘 안들립니다</button>
-    <button class="qp-btn" onclick="sendPresenterMsg('⏱ 시간이 부족합니다')">⏱ 시간이 부족합니다</button>
-    <button class="qp-btn" onclick="sendPresenterMsg('✅ 잘 받았습니다')">✅ 잘 받았습니다</button>
-    <button class="qp-btn" onclick="sendPresenterMsg('🙋 질문 있습니다')">🙋 질문 있습니다</button>
-    <button class="qp-btn" onclick="sendPresenterMsg('📡 화면 공유 확인 필요')">📡 화면 공유 확인 필요</button>
+    <div id="quickPanelBtns"><div style="color:#444;font-size:0.78rem;text-align:center;padding:0.3rem;">불러오는 중…</div></div>
   </div>
 </div>
 
 <div class="offline-banner" id="offlineBanner">⚠️ 연결이 끊어졌습니다. 재연결 중…</div>
 <div class="notice-banner" id="noticeBanner"></div>
+<!-- PWA 홈 화면 추가 안내 배너 -->
+<div class="pwa-banner" id="pwaBanner">
+  📲 완전한 전체화면을 원하시면 홈 화면에 추가하세요
+  <button onclick="document.getElementById('pwaBanner').classList.remove('show')" style="background:none;border:none;color:inherit;cursor:pointer;font-size:1rem;margin-left:0.5rem;">✕</button>
+</div>
 
 <script>
   // ── Params ──
@@ -881,7 +898,46 @@
     return String(s).replace(/'/g,"\\'").replace(/"/g,'\\"');
   }
 
+  // ── 발표자 프리셋 로딩 ──
+  async function loadPresenterPresets() {
+    try {
+      const res  = await fetch('/api/presets');
+      const data = await res.json();
+      const msgs = data.presenter || [];
+      const container = document.getElementById('quickPanelBtns');
+      if (msgs.length === 0) {
+        container.innerHTML = '<div style="color:#444;font-size:0.78rem;text-align:center;padding:0.3rem;">등록된 메시지가 없습니다</div>';
+        return;
+      }
+      container.innerHTML = msgs.map(text =>
+        `<button class="qp-btn" onclick="sendPresenterMsg('${escAttr(text)}')">${escHtml(text)}</button>`
+      ).join('');
+    } catch { /* 오류 시 유지 */ }
+  }
+
+  // ── PWA: Service Worker 등록 ──
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+
+  // ── PWA 홈 화면 추가 안내 (모바일 브라우저에서만, 이미 standalone이면 숨김) ──
+  (function checkPwa() {
+    const isStandalone =
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (!isStandalone && isMobile) {
+      const banner = document.getElementById('pwaBanner');
+      if (banner) {
+        setTimeout(() => banner.classList.add('show'), 2000);
+        setTimeout(() => banner.classList.remove('show'), 8000);
+      }
+    }
+  })();
+
   // ── Init ──
+  loadPresenterPresets();
   initPicker();
 </script>
 </body>

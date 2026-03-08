@@ -42,6 +42,14 @@ db.exec(`
     sent_at     INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
   );
 
+  CREATE TABLE IF NOT EXISTS presets (
+    id         TEXT NOT NULL,
+    type       TEXT NOT NULL,
+    text       TEXT NOT NULL,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (id, type)
+  );
+
   CREATE INDEX IF NOT EXISTS idx_messages_room   ON messages(room_id);
   CREATE INDEX IF NOT EXISTS idx_messages_target ON messages(room_id, target);
   CREATE INDEX IF NOT EXISTS idx_sections_room   ON sections(room_id);
@@ -164,6 +172,52 @@ function getMessageHistory(roomId, sectionId) {
   return rows.reverse(); // oldest first
 }
 
+// ── Presets ───────────────────────────────────────────────────────────────────
+
+const DEFAULT_PRESETS = {
+  coordinator: [
+    '⏰ 남은 시간 5분입니다',
+    '🚀 속도를 조금 올려주세요',
+    '🐢 속도를 조금 줄여주세요',
+    '🎙️ 마이크 볼륨을 높여주세요',
+    '🙋 질문이 있습니다',
+    '☕ 잠시 쉬는 시간입니다',
+  ],
+  presenter: [
+    '✋ 잠깐 멈춰주세요',
+    '👍 준비됐습니다',
+    '❓ 메시지를 못 봤어요',
+    '🔊 잘 안들립니다',
+    '⏱ 시간이 부족합니다',
+    '✅ 잘 받았습니다',
+    '🙋 질문 있습니다',
+    '📡 화면 공유 확인 필요',
+  ],
+};
+
+const presetStmts = {
+  get:    db.prepare(`SELECT text FROM presets WHERE type = ? ORDER BY sort_order ASC`),
+  count:  db.prepare(`SELECT COUNT(*) as n FROM presets WHERE type = ?`),
+  delete: db.prepare(`DELETE FROM presets WHERE type = ?`),
+  insert: db.prepare(`INSERT INTO presets (id, type, text, sort_order) VALUES (?, ?, ?, ?)`),
+};
+
+function getPresets(type) {
+  const rows = presetStmts.get.all(type);
+  if (rows.length === 0) return DEFAULT_PRESETS[type] || [];
+  return rows.map(r => r.text);
+}
+
+function setPresets(type, texts) {
+  const setAll = db.transaction((list) => {
+    presetStmts.delete.run(type);
+    list.forEach((text, i) => {
+      presetStmts.insert.run(`${type}-${i}`, type, text, i);
+    });
+  });
+  setAll(texts.filter(t => t && t.trim().length > 0));
+}
+
 // Run cleanup daily
 function runCleanup() {
   try {
@@ -185,4 +239,6 @@ module.exports = {
   saveMessage,
   getLastMessageForSection,
   getMessageHistory,
+  getPresets,
+  setPresets,
 };

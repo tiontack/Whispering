@@ -433,11 +433,30 @@ app.get('/api/rooms/:roomId/history', (req, res) => {
   res.json({ messages });
 });
 
+// ── Presets API ───────────────────────────────────────────────────────────────
+
+app.get('/api/presets', (req, res) => {
+  res.json({
+    coordinator: db.getPresets('coordinator'),
+    presenter:   db.getPresets('presenter'),
+  });
+});
+
+app.post('/api/presets', (req, res) => {
+  const { type, texts } = req.body;
+  if (!['coordinator', 'presenter'].includes(type) || !Array.isArray(texts)) {
+    return res.status(400).json({ error: 'Invalid request' });
+  }
+  db.setPresets(type, texts);
+  res.json({ ok: true });
+});
+
 // ── Page routes ───────────────────────────────────────────────────────────────
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/coordinator', (req, res) => res.sendFile(path.join(__dirname, 'public', 'coordinator.html')));
 app.get('/presenter', (req, res) => res.sendFile(path.join(__dirname, 'public', 'presenter.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

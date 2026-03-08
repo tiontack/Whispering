@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whispering – 관리자</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.9rem 1.5rem;
+      background: #1a1a2e; border-bottom: 1px solid #2a2a4a;
+      flex-wrap: wrap; gap: 0.6rem;
+    }
+    .logo {
+      font-size: 1.3rem; font-weight: 800;
+      background: linear-gradient(135deg, #0d9488, #5eead4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .header-sub { font-size: 0.8rem; color: #555; margin-left: 0.5rem; }
+    .btn-nav {
+      background: transparent; border: 1px solid #2a2a4a; border-radius: 8px;
+      padding: 0.35rem 0.8rem; color: #888; cursor: pointer; font-size: 0.8rem;
+      transition: all 0.15s;
+    }
+    .btn-nav:hover { border-color: #0d9488; color: #5eead4; }
+
+    .container {
+      max-width: 860px; margin: 2rem auto; padding: 0 1.2rem;
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+
+    .section-card {
+      background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 16px;
+      padding: 1.4rem 1.6rem;
+    }
+
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .card-title {
+      font-size: 1rem; font-weight: 700;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .card-badge {
+      font-size: 0.68rem; padding: 0.2rem 0.55rem; border-radius: 10px; font-weight: 600;
+    }
+    .badge-coordinator { background: #042f2e; color: #5eead4; border: 1px solid #0f766e; }
+    .badge-presenter   { background: #1e0a35; color: #c4b5fd; border: 1px solid #7c3aed; }
+
+    .card-desc { font-size: 0.78rem; color: #555; margin-bottom: 1.1rem; line-height: 1.5; }
+
+    .preset-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .preset-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 10px;
+      padding: 0.5rem 0.7rem;
+      transition: border-color 0.15s;
+    }
+    .preset-item:focus-within { border-color: #0d9488; }
+
+    .drag-handle {
+      color: #333; cursor: grab; font-size: 1rem; padding: 0 0.2rem;
+      user-select: none; flex-shrink: 0;
+    }
+    .drag-handle:active { cursor: grabbing; }
+    .preset-item.dragging { opacity: 0.5; border-style: dashed; }
+    .preset-item.drag-over { border-color: #0d9488; background: #0a1f1e; }
+
+    .preset-input {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: #e0e0e0; font-size: 0.9rem; font-family: inherit;
+      min-width: 0;
+    }
+    .preset-input::placeholder { color: #333; }
+
+    .btn-del {
+      background: transparent; border: none; color: #444; cursor: pointer;
+      font-size: 1rem; padding: 0.1rem 0.3rem; border-radius: 4px;
+      transition: color 0.15s; flex-shrink: 0; line-height: 1;
+    }
+    .btn-del:hover { color: #f87171; }
+
+    .card-actions {
+      display: flex; align-items: center; gap: 0.6rem;
+      margin-top: 0.9rem; flex-wrap: wrap;
+    }
+
+    .btn-add {
+      background: #0f0f1a; border: 1px dashed #2a2a4a; border-radius: 8px;
+      padding: 0.48rem 0.9rem; color: #555; cursor: pointer; font-size: 0.82rem;
+      transition: all 0.15s;
+    }
+    .btn-add:hover { border-color: #0d9488; color: #5eead4; }
+
+    .btn-save {
+      padding: 0.5rem 1.3rem; border-radius: 8px; font-size: 0.85rem;
+      font-weight: 700; cursor: pointer; border: none;
+      background: linear-gradient(135deg, #0d9488, #0f766e); color: #fff;
+      transition: all 0.2s; margin-left: auto;
+    }
+    .btn-save:hover { background: linear-gradient(135deg, #14b8a6, #0f766e); transform: translateY(-1px); }
+    .btn-save:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .save-status {
+      font-size: 0.78rem; color: #4ade80;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .save-status.show { opacity: 1; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(10px);
+      background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 10px;
+      padding: 0.7rem 1.3rem; font-size: 0.88rem; color: #e0e0e0;
+      opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 1000;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.success { border-color: #16a34a; color: #4ade80; }
+    .toast.error   { border-color: #dc2626; color: #f87171; }
+
+    /* ── Info box ── */
+    .info-box {
+      background: #0a1020; border: 1px solid #1a2a4a; border-radius: 12px;
+      padding: 1rem 1.3rem; font-size: 0.82rem; color: #666; line-height: 1.8;
+    }
+    .info-box strong { color: #5eead4; }
+
+    /* ── Mobile ── */
+    @media (max-width: 600px) {
+      .container { padding: 0 0.7rem; margin: 1rem auto; }
+      .section-card { padding: 1rem 1rem; }
+      .btn-save { margin-left: 0; width: 100%; justify-content: center; }
+      .card-actions { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:0.4rem;">
+    <div class="logo">Whispering</div>
+    <span class="header-sub">관리자</span>
+  </div>
+  <div style="display:flex;gap:0.5rem;">
+    <button class="btn-nav" onclick="location.href='/'">← 로비</button>
+    <button class="btn-nav" onclick="location.href='/coordinator'">담당자 페이지</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- 안내 -->
+  <div class="info-box">
+    여기서 설정한 프리셋은 <strong>담당자 페이지의 빠른 메시지</strong>와
+    <strong>발표자 화면의 담당자에게 메시지</strong> 버튼에 즉시 반영됩니다.<br>
+    드래그로 순서를 바꾸거나, 항목을 추가·삭제·수정 후 <strong>저장</strong>하세요.
+  </div>
+
+  <!-- 담당자 빠른 메시지 -->
+  <div class="section-card" id="card-coordinator">
+    <div class="card-header">
+      <div class="card-title">
+        담당자 빠른 메시지
+        <span class="card-badge badge-coordinator">coordinator</span>
+      </div>
+    </div>
+    <p class="card-desc">담당자 페이지 우측 사이드바 "빠른 메시지" 버튼 목록입니다.<br>클릭하면 메시지 입력창에 자동으로 입력됩니다.</p>
+    <div class="preset-list" id="list-coordinator"></div>
+    <div class="card-actions">
+      <button class="btn-add" onclick="addItem('coordinator')">+ 항목 추가</button>
+      <span class="save-status" id="status-coordinator">✓ 저장됨</span>
+      <button class="btn-save" onclick="save('coordinator')">저장</button>
+    </div>
+  </div>
+
+  <!-- 발표자 빠른 메시지 -->
+  <div class="section-card" id="card-presenter">
+    <div class="card-header">
+      <div class="card-title">
+        발표자 → 담당자 메시지
+        <span class="card-badge badge-presenter">presenter</span>
+      </div>
+    </div>
+    <p class="card-desc">발표자 화면 좌측 하단 "💬 담당자에게" 패널의 버튼 목록입니다.<br>발표자가 탭하면 담당자에게 즉시 전송됩니다.</p>
+    <div class="preset-list" id="list-presenter"></div>
+    <div class="card-actions">
+      <button class="btn-add" onclick="addItem('presenter')">+ 항목 추가</button>
+      <span class="save-status" id="status-presenter">✓ 저장됨</span>
+      <button class="btn-save" onclick="save('presenter')">저장</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let presets = { coordinator: [], presenter: [] };
+
+  // ── Load ──
+  async function load() {
+    try {
+      const res  = await fetch('/api/presets');
+      const data = await res.json();
+      presets.coordinator = data.coordinator || [];
+      presets.presenter   = data.presenter   || [];
+      render('coordinator');
+      render('presenter');
+    } catch {
+      showToast('프리셋을 불러오지 못했습니다.', 'error');
+    }
+  }
+
+  // ── Render list ──
+  function render(type) {
+    const list = document.getElementById(`list-${type}`);
+    list.innerHTML = '';
+    presets[type].forEach((text, idx) => {
+      list.appendChild(makeItem(type, text, idx));
+    });
+  }
+
+  function makeItem(type, text, idx) {
+    const item = document.createElement('div');
+    item.className = 'preset-item';
+    item.draggable = true;
+    item.dataset.idx = idx;
+
+    item.innerHTML = `
+      <span class="drag-handle" title="드래그로 순서 변경">⠿</span>
+      <input class="preset-input" type="text" value="${escHtml(text)}" placeholder="메시지 입력…"
+        onchange="presets['${type}'][${idx}] = this.value" />
+      <button class="btn-del" onclick="removeItem('${type}', ${idx})" title="삭제">✕</button>
+    `;
+
+    // Drag events
+    item.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', `${type}:${idx}`);
+      item.classList.add('dragging');
+    });
+    item.addEventListener('dragend', () => item.classList.remove('dragging'));
+    item.addEventListener('dragover', e => { e.preventDefault(); item.classList.add('drag-over'); });
+    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      item.classList.remove('drag-over');
+      const [srcType, srcIdx] = e.dataTransfer.getData('text/plain').split(':');
+      if (srcType !== type) return;
+      const from = parseInt(srcIdx), to = parseInt(item.dataset.idx);
+      if (from === to) return;
+      const arr = presets[type];
+      const [moved] = arr.splice(from, 1);
+      arr.splice(to, 0, moved);
+      render(type);
+    });
+
+    return item;
+  }
+
+  function addItem(type) {
+    presets[type].push('');
+    render(type);
+    // Focus the last input
+    const inputs = document.querySelectorAll(`#list-${type} .preset-input`);
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  }
+
+  function removeItem(type, idx) {
+    presets[type].splice(idx, 1);
+    render(type);
+  }
+
+  // ── Save ──
+  async function save(type) {
+    // Collect current input values (may not have fired onchange yet)
+    const inputs = document.querySelectorAll(`#list-${type} .preset-input`);
+    const texts  = [...inputs].map(el => el.value.trim()).filter(Boolean);
+
+    try {
+      const res = await fetch('/api/presets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, texts }),
+      });
+      if (!res.ok) throw new Error();
+      presets[type] = texts;
+      render(type);
+      const status = document.getElementById(`status-${type}`);
+      status.classList.add('show');
+      setTimeout(() => status.classList.remove('show'), 2500);
+      showToast(`${type === 'coordinator' ? '담당자' : '발표자'} 프리셋 저장됨`, 'success');
+    } catch {
+      showToast('저장 실패. 다시 시도해 주세요.', 'error');
+    }
+  }
+
+  // ── Toast ──
+  let toastTimer;
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className   = 'toast show' + (type ? ` ${type}` : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  load();
+</script>
+</body>
+</html>

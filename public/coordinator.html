@@ -492,14 +492,12 @@
 
     <!-- Quick messages -->
     <div class="panel">
-      <div class="panel-title" style="margin-bottom:0.4rem;">빠른 메시지</div>
-      <div style="display:flex;flex-direction:column;gap:0.35rem;">
-        <button class="display-btn" onclick="quickMsg('남은 시간 5분입니다')">⏰ 남은 시간 5분</button>
-        <button class="display-btn" onclick="quickMsg('속도를 조금 올려주세요')">🚀 속도 업</button>
-        <button class="display-btn" onclick="quickMsg('속도를 조금 줄여주세요')">🐢 속도 다운</button>
-        <button class="display-btn" onclick="quickMsg('마이크 볼륨을 높여주세요')">🎙️ 볼륨 업</button>
-        <button class="display-btn" onclick="quickMsg('질문이 있습니다')">🙋 질문 있음</button>
-        <button class="display-btn" onclick="quickMsg('잠시 쉬는 시간입니다')">☕ 휴식 시간</button>
+      <div class="section-header" style="margin-bottom:0.4rem;">
+        <div class="panel-title">빠른 메시지</div>
+        <button class="icon-btn" onclick="location.href='/admin'" title="프리셋 관리" style="font-size:0.72rem;padding:0.2rem 0.5rem;">⚙️ 편집</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.35rem;" id="quickMsgList">
+        <div style="color:#333;font-size:0.75rem;text-align:center;">불러오는 중…</div>
       </div>
     </div>
 
@@ -967,6 +965,24 @@
     return String(s).replace(/'/g,"\\'").replace(/"/g,'\\"');
   }
 
+  // ── 프리셋 로딩 ──
+  async function loadPresets() {
+    try {
+      const res  = await fetch('/api/presets');
+      const data = await res.json();
+      const list = document.getElementById('quickMsgList');
+      const msgs = data.coordinator || [];
+      if (msgs.length === 0) {
+        list.innerHTML = '<div style="color:#333;font-size:0.75rem;text-align:center;">등록된 빠른 메시지가 없습니다</div>';
+        return;
+      }
+      list.innerHTML = msgs.map(text =>
+        `<button class="display-btn" onclick="quickMsg('${escAttr(text)}')">${escHtml(text)}</button>`
+      ).join('');
+    } catch { /* 서버 오류 시 빈 상태 유지 */ }
+  }
+
+  loadPresets();
   connect();
 </script>
 </body>
