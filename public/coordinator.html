@@ -523,6 +523,7 @@
   const ROOM_PW   = params.get('pw') || '';
 
   let ws;
+  let _roomDeleted = false;
   let urgency     = 'normal';
   let targetMode  = 'all';           // 'all' | 'multi'
   let selectedSectionIds = new Set(); // used when targetMode === 'multi'
@@ -596,10 +597,14 @@
           alert(`입장 실패: ${msg.payload.reason}`);
           location.href = '/';
           break;
+        case 'room_deleted':
+          _roomDeleted = true;
+          location.href = '/';
+          break;
       }
     };
 
-    ws.onclose = () => { setStatus(false); setTimeout(connect, 3000); };
+    ws.onclose = () => { if (!_roomDeleted) { setStatus(false); setTimeout(connect, 3000); } };
     ws.onerror = () => ws.close();
   }
 
