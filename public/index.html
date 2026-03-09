@@ -213,6 +213,30 @@
     .join-pres:hover  { background: #1a3a4a; border-color: #3b82f6; }
     .join-share { background: #1a1a2e; border-color: #3a3a6a; color: #888; }
     .join-share:hover { border-color: #0d9488; color: #5eead4; }
+    .join-del { background: #1a0a0a; border-color: #4a1a1a; color: #888; }
+    .join-del:hover { background: #2a0a0a; border-color: #ef4444; color: #f87171; }
+
+    /* ── Delete modal ── */
+    .del-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      display: flex; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
+    .del-modal-overlay.hidden { display: none; }
+    .del-modal { background: #1a1a2e; border: 1px solid #4a1a1a; border-radius: 18px;
+      padding: 2rem; width: 100%; max-width: 340px; box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
+    .del-modal-title { font-size: 1.05rem; font-weight: 700; color: #f87171; margin-bottom: 0.4rem; }
+    .del-modal-sub { font-size: 0.82rem; color: #666; margin-bottom: 1.2rem; }
+    .del-modal input { width: 100%; background: #0f0f1a; border: 1px solid #2a2a4a;
+      border-radius: 10px; padding: 0.75rem 0.9rem; color: #e0e0e0; font-size: 1rem;
+      outline: none; margin-bottom: 0.5rem; transition: border-color 0.2s; }
+    .del-modal input:focus { border-color: #ef4444; }
+    .del-modal-error { font-size: 0.78rem; color: #f87171; min-height: 1.1rem; margin-bottom: 0.8rem; }
+    .del-modal-btns { display: flex; gap: 0.6rem; }
+    .btn-del-confirm { flex: 1; background: #7f1d1d; border: none; border-radius: 10px;
+      padding: 0.72rem; color: #fca5a5; font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; transition: background 0.15s; }
+    .btn-del-confirm:hover { background: #991b1b; color: #fff; }
+    .btn-del-cancel { background: transparent; border: 1px solid #333; border-radius: 10px;
+      padding: 0.72rem 1rem; color: #888; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; }
+    .btn-del-cancel:hover { border-color: #555; color: #bbb; }
 
     .room-id-tag {
       font-size: 0.65rem; color: #444; font-family: monospace;
@@ -329,8 +353,6 @@
 
 <header>
   <div class="header-left">
-    <img src="/sk-logo.svg" alt="SK" class="sk-logo-img" />
-    <div class="header-divider"></div>
     <div class="logo">Whispering</div>
   </div>
   <div class="tagline">강단의 발표자에게, 조용히 메시지를 전달하세요</div>
@@ -409,6 +431,23 @@
     <div class="pw-modal-btns">
       <button class="btn-pw-cancel" onclick="closePwModal()">취소</button>
       <button class="btn-pw-confirm" onclick="confirmPwModal()">입장하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Delete Modal ── -->
+<div class="del-modal-overlay hidden" id="delModal">
+  <div class="del-modal">
+    <div class="del-modal-title">🗑 방 삭제</div>
+    <div class="del-modal-sub" id="delModalSub">—</div>
+    <div id="delPwSection">
+      <input type="password" id="delPwInput" placeholder="비밀번호 입력" maxlength="30"
+        onkeydown="if(event.key==='Enter')confirmDelete()" />
+    </div>
+    <div class="del-modal-error" id="delModalError"></div>
+    <div class="del-modal-btns">
+      <button class="btn-del-cancel" onclick="closeDeleteModal()">취소</button>
+      <button class="btn-del-confirm" onclick="confirmDelete()">삭제</button>
     </div>
   </div>
 </div>
@@ -499,6 +538,8 @@
               onclick="joinRoom('${escAttr(r.id)}', '${escAttr(r.name)}', 'presenter', ${r.hasPassword})">발표</button>
             <button class="join-btn join-share"
               onclick="openShareModal('${escAttr(r.id)}', '${escAttr(r.name)}')">🔗</button>
+            <button class="join-btn join-del"
+              onclick="openDeleteModal('${escAttr(r.id)}', '${escAttr(r.name)}', ${r.hasPassword})" title="방 삭제">🗑</button>
           </div>
         </div>
       `).join('');
@@ -580,6 +621,48 @@
     closePwModal();
     navigate(id, name, role, pw);
   }
+
+  // ── Delete modal ──
+  let _delData = null;
+
+  function openDeleteModal(id, name, hasPassword) {
+    _delData = { id, name, hasPassword };
+    document.getElementById('delModalSub').textContent = `"${name}" 방을 삭제하시겠습니까?`;
+    const pwSection = document.getElementById('delPwSection');
+    pwSection.style.display = hasPassword ? 'block' : 'none';
+    document.getElementById('delPwInput').value = '';
+    document.getElementById('delModalError').textContent = '';
+    document.getElementById('delModal').classList.remove('hidden');
+    if (hasPassword) setTimeout(() => document.getElementById('delPwInput').focus(), 50);
+  }
+
+  function closeDeleteModal() {
+    document.getElementById('delModal').classList.add('hidden');
+    _delData = null;
+  }
+
+  async function confirmDelete() {
+    if (!_delData) return;
+    const pw = _delData.hasPassword ? document.getElementById('delPwInput').value.trim() : undefined;
+    const errEl = document.getElementById('delModalError');
+    errEl.textContent = '';
+    try {
+      const res = await fetch(`/api/rooms/${encodeURIComponent(_delData.id)}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw }),
+      });
+      const data = await res.json();
+      if (!res.ok) { errEl.textContent = data.error || '삭제 실패'; return; }
+      closeDeleteModal();
+    } catch (e) {
+      errEl.textContent = '서버 오류가 발생했습니다.';
+    }
+  }
+
+  document.getElementById('delModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('delModal')) closeDeleteModal();
+  });
 
   // ── Share modal ──
   let _shareData = null;

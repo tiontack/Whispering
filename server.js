@@ -440,6 +440,36 @@ app.get('/api/rooms/:roomId', (req, res) => {
   res.json({ room: null, sections: sections.map(s => ({ ...s, presenterCount: 0 })) });
 });
 
+app.delete('/api/rooms/:roomId', (req, res) => {
+  const { roomId } = req.params;
+  const { password } = req.body;
+
+  const room = rooms.get(roomId);
+  const storedPw = room ? room.password : db.getRoomPassword(roomId);
+
+  if (storedPw && password !== storedPw) {
+    return res.status(403).json({ error: '비밀번호가 올바르지 않습니다.' });
+  }
+
+  if (room) {
+    const bye = JSON.stringify({ type: 'room_deleted' });
+    if (room.coordinator && room.coordinator.readyState === WebSocket.OPEN) {
+      room.coordinator.send(bye);
+      room.coordinator.close();
+    }
+    for (const section of room.sections.values()) {
+      for (const ws of section.presenters) {
+        if (ws.readyState === WebSocket.OPEN) { ws.send(bye); ws.close(); }
+      }
+    }
+    rooms.delete(roomId);
+  }
+
+  db.deleteRoom(roomId);
+  broadcastRoomList();
+  res.json({ ok: true });
+});
+
 app.get('/api/rooms/:roomId/history', (req, res) => {
   const { roomId } = req.params;
   const { section = 'all' } = req.query;

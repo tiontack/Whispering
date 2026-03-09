@@ -134,6 +134,8 @@ const stmts = {
   pruneOldRooms: db.prepare(`
     DELETE FROM rooms WHERE last_active < unixepoch() - 604800
   `),
+
+  deleteRoom: db.prepare(`DELETE FROM rooms WHERE id = ?`),
 };
 
 // ── Exported API ──────────────────────────────────────────────────────────────
@@ -145,6 +147,10 @@ function upsertRoom(id, name, password) {
 function getRoomPassword(id) {
   const row = stmts.getPassword.get(id);
   return row ? row.password : null;
+}
+
+function deleteRoom(id) {
+  stmts.deleteRoom.run(id);
 }
 
 function touchRoom(id) {
@@ -248,6 +254,7 @@ module.exports = {
   upsertRoom,
   touchRoom,
   getRoomPassword,
+  deleteRoom,
   upsertSection,
   renameSection,
   deleteSection,
