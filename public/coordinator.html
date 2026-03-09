@@ -330,6 +330,16 @@
 </head>
 <body>
 
+<!-- ── Ended Room Overlay ── -->
+<div id="endedOverlay" style="display:none;position:fixed;inset:0;background:#0f0f1a;
+  z-index:999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;">
+  <div style="font-size:2.5rem;">🚫</div>
+  <div id="endedMsg" style="font-size:1.3rem;font-weight:700;color:#e0e0e0;">종료된 방입니다.</div>
+  <button onclick="location.href='/'"
+    style="margin-top:0.5rem;padding:0.75rem 2rem;background:#0d9488;border:none;border-radius:12px;
+    color:#fff;font-size:1rem;font-weight:700;cursor:pointer;">로비로 이동</button>
+</div>
+
 <header>
   <div style="display:flex;align-items:center;gap:0.7rem;">
     <div class="logo">Whispering</div>
@@ -594,8 +604,8 @@
           location.href = '/';
           break;
         case 'join_denied':
-          alert(`입장 실패: ${msg.payload.reason}`);
-          location.href = '/';
+          if (msg.payload.ended) showEndedScreen(msg.payload.reason);
+          else { alert(`입장 실패: ${msg.payload.reason}`); location.href = '/'; }
           break;
         case 'room_deleted':
           _roomDeleted = true;
@@ -606,6 +616,13 @@
 
     ws.onclose = () => { if (!_roomDeleted) { setStatus(false); setTimeout(connect, 3000); } };
     ws.onerror = () => ws.close();
+  }
+
+  function showEndedScreen(reason) {
+    _roomDeleted = true;
+    const el = document.getElementById('endedOverlay');
+    document.getElementById('endedMsg').textContent = reason || '종료된 방입니다.';
+    el.style.display = 'flex';
   }
 
   function setStatus(online) {

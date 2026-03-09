@@ -23,6 +23,7 @@ app.use(express.json());
 const rooms = new Map();
 const clients = new Map(); // ws → { role, roomId, sectionId, id }
 const lobbyClients = new Set();
+const deletedRooms = new Set(); // rooms explicitly deleted via API
 
 // ── Section helpers ──────────────────────────────────────────────────────────
 
@@ -176,6 +177,12 @@ wss.on('connection', (ws) => {
       // ── Join room ──
       case 'join': {
         const { role, name, sectionId, sectionName, password } = payload;
+
+        // Block access to explicitly deleted rooms
+        if (deletedRooms.has(roomId)) {
+          ws.send(JSON.stringify({ type: 'join_denied', payload: { reason: '종료된 방입니다.', ended: true } }));
+          return;
+        }
 
         // Password check: if room already exists (in-memory or DB), validate password
         const existingRoom = rooms.get(roomId);
@@ -450,6 +457,8 @@ app.delete('/api/rooms/:roomId', (req, res) => {
   if (storedPw && password !== storedPw) {
     return res.status(403).json({ error: '비밀번호가 올바르지 않습니다.' });
   }
+
+  deletedRooms.add(roomId);
 
   if (room) {
     const bye = JSON.stringify({ type: 'room_deleted' });
