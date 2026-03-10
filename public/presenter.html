@@ -56,6 +56,29 @@
     .picker-section-title { font-size: 0.72rem; text-transform: uppercase;
       letter-spacing: 0.12em; color: #555; font-weight: 700; margin-bottom: 0.8rem; }
 
+    /* ── Room picker ── */
+    .room-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem;
+      max-height: 45vh; overflow-y: auto; }
+    .room-picker-item {
+      display: flex; align-items: center; gap: 0.8rem;
+      background: #0f0f1a; border: 2px solid #2a2a4a; border-radius: 12px;
+      padding: 0.9rem 1rem; cursor: pointer; transition: all 0.18s; text-align: left; width: 100%;
+    }
+    .room-picker-item:hover { border-color: #0f766e; background: #1a1a35; }
+    .room-picker-dot { width: 10px; height: 10px; border-radius: 50%;
+      background: #22c55e; flex-shrink: 0; }
+    .room-picker-dot.empty { background: #444; }
+    .room-picker-info { flex: 1; min-width: 0; }
+    .room-picker-name { font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .room-picker-meta { font-size: 0.72rem; color: #555; margin-top: 0.2rem; }
+    .room-picker-empty { color: #444; font-size: 0.85rem; text-align: center; padding: 2rem 0; }
+    .btn-back-to-rooms {
+      background: transparent; border: 1px solid #2a2a4a; border-radius: 10px;
+      padding: 0.5rem 1rem; color: #666; font-size: 0.82rem; cursor: pointer;
+      transition: all 0.15s; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;
+    }
+    .btn-back-to-rooms:hover { border-color: #555; color: #bbb; }
+
     .section-options { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.2rem; }
     .section-option {
       display: flex; align-items: center; gap: 0.8rem;
@@ -443,14 +466,30 @@
     color:#fff;font-size:1rem;font-weight:700;cursor:pointer;">로비로 이동</button>
 </div>
 
+<!-- ── Room picker overlay ── -->
+<div class="picker-overlay" id="roomPickerOverlay">
+  <div class="picker-logo">Whispering</div>
+  <p class="picker-subtitle">입장할 방을 선택하세요</p>
+  <div class="picker-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div class="picker-section-title" style="margin-bottom:0;">활성 방 목록</div>
+      <button class="btn-picker-refresh" id="btnRoomRefresh" onclick="loadRoomPicker()">↻ 새로고침</button>
+    </div>
+    <div class="room-list" id="roomPickerList">
+      <div class="room-picker-empty">불러오는 중…</div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Section picker overlay ── -->
-<div class="picker-overlay" id="pickerOverlay">
+<div class="picker-overlay hidden" id="pickerOverlay">
   <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.3rem;">
     <div class="picker-logo" style="margin-bottom:0;">Whispering</div>
   </div>
   <p class="picker-subtitle">분과를 선택하고 입장하세요</p>
 
   <div class="picker-card">
+    <button class="btn-back-to-rooms" id="btnBackToRooms" onclick="backToRoomPicker()">← 방 목록으로</button>
     <div class="picker-room-info">
       <span class="picker-room-name" id="pickerRoomName">—</span>
       <span class="picker-room-code" id="pickerRoomCode">—</span>
@@ -539,11 +578,12 @@
 <script>
   // ── Params ──
   const params      = new URLSearchParams(location.search);
-  const SESSION     = params.get('room') || params.get('session') || 'default';
-  const ROOM_NAME   = params.get('name') || SESSION;
+  let   SESSION     = params.get('room') || params.get('session') || '';
+  let   ROOM_NAME   = params.get('name') || SESSION;
   const ROOM_PW     = params.get('pw') || '';
   const SEC_ID_INIT = params.get('section')  || '';
   const SEC_NM_INIT = params.get('sectionName') || SEC_ID_INIT;
+  const HAS_ROOM_PARAM = !!SESSION;
 
   let SECTION_ID   = SEC_ID_INIT;
   let SECTION_NAME = SEC_NM_INIT;
@@ -555,11 +595,13 @@
   let idleTimer, clockFullInterval;
   let selectedSectionId = '', selectedSectionName = '';
 
-  // ── Basic display setup ──
-  document.getElementById('sessionDisplay').textContent  = SESSION;
-  document.getElementById('roomNameDisplay').textContent = ROOM_NAME;
-  document.getElementById('pickerRoomName').textContent  = ROOM_NAME;
-  document.getElementById('pickerRoomCode').textContent  = SESSION;
+  // ── Basic display setup (skipped when no room param; set after room selection) ──
+  if (HAS_ROOM_PARAM) {
+    document.getElementById('sessionDisplay').textContent  = SESSION;
+    document.getElementById('roomNameDisplay').textContent = ROOM_NAME;
+    document.getElementById('pickerRoomName').textContent  = ROOM_NAME;
+    document.getElementById('pickerRoomCode').textContent  = SESSION;
+  }
 
   // ── Clock ──
   function updateClock() {
@@ -1070,9 +1112,77 @@
     setTimeout(() => { if (!_deferredInstall) showPwaBanner(); }, 3000);
   }
 
+  // ── Room picker ──
+  async function loadRoomPicker() {
+    const list = document.getElementById('roomPickerList');
+    list.innerHTML = '<div class="room-picker-empty">불러오는 중…</div>';
+    try {
+      const res  = await fetch('/api/rooms');
+      const data = await res.json();
+      const rooms = (data.rooms || []).sort((a, b) => b.createdAt - a.createdAt);
+      if (!rooms.length) {
+        list.innerHTML = '<div class="room-picker-empty">활성화된 방이 없습니다.<br><span style="font-size:0.75rem;color:#333">담당자가 방을 먼저 만들어야 합니다.</span></div>';
+        return;
+      }
+      list.innerHTML = rooms.map(r => `
+        <button class="room-picker-item" onclick="selectRoom(${JSON.stringify(r.id)}, ${JSON.stringify(r.name)}, ${r.hasPassword})">
+          <div class="room-picker-dot${r.hasCoordinator ? '' : ' empty'}"></div>
+          <div class="room-picker-info">
+            <div class="room-picker-name">
+              ${escHtml(r.name)}
+              ${r.hasPassword ? '<span style="font-size:0.75rem;opacity:0.6">🔒</span>' : ''}
+            </div>
+            <div class="room-picker-meta">
+              ${r.hasCoordinator ? '🎛️ 담당자 접속 중' : '⚫ 담당자 없음'} &nbsp;·&nbsp; 🖥️ 발표자 ${r.presenterCount}명
+            </div>
+          </div>
+        </button>`).join('');
+    } catch {
+      list.innerHTML = '<div class="room-picker-empty">목록을 불러오지 못했습니다.</div>';
+    }
+  }
+
+  function selectRoom(id, name, hasPassword) {
+    SESSION   = id;
+    ROOM_NAME = name;
+    document.getElementById('roomPickerOverlay').classList.add('hidden');
+    document.getElementById('pickerOverlay').classList.remove('hidden');
+    document.getElementById('pickerRoomName').textContent = name;
+    document.getElementById('pickerRoomCode').textContent = id;
+    document.getElementById('roomNameDisplay').textContent = name;
+    document.getElementById('sessionDisplay').textContent  = id;
+    // show back button only when navigated from room picker
+    document.getElementById('btnBackToRooms').style.display = 'flex';
+    initPicker();
+  }
+
+  function backToRoomPicker() {
+    // If already connected, disconnect first
+    if (ws) { try { ws.close(); } catch (_) {} ws = null; }
+    SECTION_ID = ''; SECTION_NAME = '';
+    document.getElementById('pickerOverlay').classList.add('hidden');
+    document.getElementById('roomPickerOverlay').classList.remove('hidden');
+    loadRoomPicker();
+  }
+
   // ── Init ──
+  function initApp() {
+    if (HAS_ROOM_PARAM) {
+      // URL already has room → hide room picker, go straight to section picker
+      document.getElementById('roomPickerOverlay').classList.add('hidden');
+      document.getElementById('pickerOverlay').classList.remove('hidden');
+      document.getElementById('btnBackToRooms').style.display = 'none';
+      initPicker();
+    } else {
+      // No room param → show room picker first
+      document.getElementById('roomPickerOverlay').classList.remove('hidden');
+      document.getElementById('pickerOverlay').classList.add('hidden');
+      loadRoomPicker();
+    }
+  }
+
   loadPresenterPresets();
-  initPicker();
+  initApp();
 </script>
 </body>
 </html>
