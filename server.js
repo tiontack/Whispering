@@ -373,6 +373,18 @@ wss.on('connection', (ws) => {
         break;
       }
 
+      // ── Coordinator acks a presenter message ──
+      case 'ack_presenter_message': {
+        const client = clients.get(ws);
+        if (!client || client.role !== 'coordinator') return;
+        const { sectionId, timestamp } = payload;
+        broadcastToPresenters(client.roomId, {
+          type: 'presenter_msg_acked',
+          payload: { timestamp },
+        }, sectionId);
+        break;
+      }
+
       // ── Presenter → Coordinator quick message ──
       case 'presenter_message': {
         const client = clients.get(ws);
@@ -381,9 +393,10 @@ wss.on('connection', (ws) => {
         if (!room) return;
         const section = room.sections.get(client.sectionId);
         const sectionName = section ? section.name : (client.sectionId || '발표자');
+        const ts = payload.timestamp || Date.now();
         sendToCoordinator(client.roomId, {
           type: 'presenter_message',
-          payload: { sectionId: client.sectionId, sectionName, text: payload.text, timestamp: Date.now() },
+          payload: { sectionId: client.sectionId, sectionName, text: payload.text, timestamp: ts },
         });
         break;
       }

@@ -207,6 +207,13 @@
     .badge-presenter { background: #3a1a5a; color: #c4b5fd; border: 1px solid #7c3aed; }
     .history-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .history-time { font-size: 0.65rem; color: #554466; flex-shrink: 0; }
+    .presenter-ack-btn {
+      flex-shrink: 0; padding: 0.18rem 0.55rem; font-size: 0.65rem; font-weight: 700;
+      background: #1a0a35; border: 1px solid #7c3aed; border-radius: 8px; color: #c4b5fd;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .presenter-ack-btn:hover { background: #3a1a5a; color: #fff; }
+    .presenter-ack-done { flex-shrink: 0; font-size: 0.65rem; color: #4ade80; font-weight: 700; }
     /* 확인 답글 */
     .history-ack-item {
       margin-left: 1.2rem; display: flex; align-items: center; gap: 0.4rem;
@@ -575,7 +582,7 @@
         }
         case 'presenter_message': {
           const pm = msg.payload;
-          history.unshift({ type: 'presenter', text: pm.text, sectionName: pm.sectionName, timestamp: pm.timestamp });
+          history.unshift({ type: 'presenter', sectionId: pm.sectionId, text: pm.text, sectionName: pm.sectionName, timestamp: pm.timestamp, acked: false });
           if (history.length > 30) history.pop();
           renderHistory();
           showPresenterMsgToast(pm.sectionName, pm.text);
@@ -822,6 +829,9 @@
           <span class="history-badge badge-section">${escHtml(h.sectionName)}</span>
           <span class="history-text">${escHtml(h.text)}</span>
           <span class="history-time">${fmtTime(h.timestamp)}</span>
+          ${h.acked
+            ? '<span class="presenter-ack-done">✓ 확인함</span>'
+            : `<button class="presenter-ack-btn" onclick="ackPresenterMsg('${escAttr(h.sectionId)}', ${h.timestamp})">확인</button>`}
         </div>`;
       return `
         <div class="history-item" onclick="reuseMsg('${escAttr(h.text)}', '${h.urgency}')">
@@ -843,6 +853,13 @@
   function fmtTime(ts) {
     const d = new Date(ts);
     return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  function ackPresenterMsg(sectionId, timestamp) {
+    const item = history.find(h => h.type === 'presenter' && h.timestamp === timestamp);
+    if (item) item.acked = true;
+    renderHistory();
+    send({ type: 'ack_presenter_message', payload: { sectionId, timestamp } });
   }
 
   let pmToastTimer;

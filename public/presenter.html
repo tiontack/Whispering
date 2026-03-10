@@ -442,6 +442,15 @@
       padding: 0.3rem; animation: fadeOut 1.5s ease forwards;
     }
     @keyframes fadeOut { 0%,60% { opacity:1; } 100% { opacity:0; } }
+    .qp-ack-status {
+      background: #0c0c20; border: 1px solid #2a2a4a; border-radius: 8px;
+      padding: 0.45rem 0.6rem; display: flex; flex-direction: column; gap: 0.2rem;
+    }
+    .qp-ack-status.hidden { display: none; }
+    .qp-ack-msg { font-size: 0.72rem; color: #777; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .qp-ack-label { font-size: 0.7rem; font-weight: 700; color: #fbbf24; }
+    .qp-ack-label.confirmed { color: #4ade80; }
+    .btn-quick-msg.unconfirmed { border-color: #fbbf24; color: #fbbf24; }
 
     /* ── Picker refresh button ── */
     .btn-picker-refresh {
@@ -540,6 +549,10 @@
   <button class="btn-quick-msg" id="btnQuickMsg" onclick="toggleQuickPanel()">💬 담당자에게</button>
   <div class="quick-msg-panel hidden" id="quickPanel">
     <div class="qp-title">담당자에게 전달</div>
+    <div class="qp-ack-status hidden" id="qpAckStatus">
+      <span class="qp-ack-msg" id="qpAckMsg"></span>
+      <span class="qp-ack-label" id="qpAckLabel">확인 전입니다</span>
+    </div>
     <div id="quickPanelBtns"><div style="color:#444;font-size:0.78rem;text-align:center;padding:0.3rem;">불러오는 중…</div></div>
   </div>
 </div>
@@ -576,6 +589,7 @@
   let SECTION_NAME = SEC_NM_INIT;
 
   let messageAcked = false;
+  let lastSentMsg = null; // { text, timestamp, acked }
   let ws, currentMessage = null, timerState = null, displayMode = 'both';
   let _roomDeleted = false;
   let timerInterval, timerSecondsLeft = 0;
@@ -756,6 +770,12 @@
         case 'join_denied':
           if (msg.payload.ended) showEndedScreen(msg.payload.reason);
           else { alert(`입장 실패: ${msg.payload.reason}`); location.href = '/'; }
+          break;
+        case 'presenter_msg_acked':
+          if (lastSentMsg && lastSentMsg.timestamp === msg.payload.timestamp) {
+            lastSentMsg.acked = true;
+            renderAckStatus();
+          }
           break;
         case 'room_deleted':
           _roomDeleted = true;
@@ -997,16 +1017,32 @@
   }
 
   function sendPresenterMsg(text) {
+    const timestamp = Date.now();
     if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ type: 'presenter_message', roomId: SESSION, payload: { text } }));
+      ws.send(JSON.stringify({ type: 'presenter_message', roomId: SESSION, payload: { text, timestamp } }));
     }
-    // 피드백 표시 후 패널 닫기
-    const panel = document.getElementById('quickPanel');
-    const sent = document.createElement('div');
-    sent.className = 'qp-sent';
-    sent.textContent = '✓ 전송됨';
-    panel.appendChild(sent);
-    setTimeout(() => { sent.remove(); panel.classList.add('hidden'); }, 1000);
+    lastSentMsg = { text, timestamp, acked: false };
+    renderAckStatus();
+    document.getElementById('btnQuickMsg').classList.add('unconfirmed');
+  }
+
+  function renderAckStatus() {
+    const statusEl = document.getElementById('qpAckStatus');
+    const msgEl    = document.getElementById('qpAckMsg');
+    const labelEl  = document.getElementById('qpAckLabel');
+    const btn      = document.getElementById('btnQuickMsg');
+    if (!lastSentMsg) { statusEl.classList.add('hidden'); return; }
+    statusEl.classList.remove('hidden');
+    msgEl.textContent = `"${lastSentMsg.text}"`;
+    if (lastSentMsg.acked) {
+      labelEl.textContent = '✓ 메시지를 확인하였습니다';
+      labelEl.className = 'qp-ack-label confirmed';
+      btn.classList.remove('unconfirmed');
+    } else {
+      labelEl.textContent = '확인 전입니다';
+      labelEl.className = 'qp-ack-label';
+      btn.classList.add('unconfirmed');
+    }
   }
 
   // 패널 외부 클릭 시 닫기
