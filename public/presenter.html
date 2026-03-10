@@ -28,9 +28,18 @@
     .picker-overlay {
       position: fixed; inset: 0; background: #050510;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      z-index: 200; padding: 2rem;
+      z-index: 200; padding: 2rem; overflow-y: auto;
     }
     .picker-overlay.hidden { display: none; }
+
+    /* 전체화면 버튼 (picker 위) */
+    .btn-picker-fs {
+      position: absolute; top: 1rem; right: 1.2rem;
+      background: transparent; border: 1px solid #2a2a4a; border-radius: 8px;
+      padding: 0.35rem 0.75rem; color: #555; cursor: pointer; font-size: 0.78rem;
+      transition: all 0.15s; z-index: 5;
+    }
+    .btn-picker-fs:hover { border-color: #0d9488; color: #5eead4; }
 
     .picker-logo {
       font-size: 2rem; font-weight: 800; margin-bottom: 0.3rem;
@@ -43,6 +52,7 @@
       background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 18px;
       padding: 2rem; width: 100%; max-width: 460px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      max-height: calc(100dvh - 9rem); overflow-y: auto;
     }
 
     .picker-room-info {
@@ -354,6 +364,11 @@
       background: #050510;
       overflow: hidden;
     }
+    /* CSS 전체화면 시 body overflow 잠금 */
+    body.css-fs-body { overflow: hidden; }
+    /* CSS 전체화면 시 picker 오버레이는 항상 위에 (z-index:200 > stage z-index:100) */
+    body.css-fs-body .picker-overlay:not(.hidden) { z-index: 210; }
+
     /* ── Native fullscreen: 브라우저 크롬까지 완전히 덮음 ── */
     :fullscreen          .topbar { display: none !important; }
     :-webkit-full-screen .topbar { display: none !important; }
@@ -477,6 +492,7 @@
 
 <!-- ── Room picker overlay ── -->
 <div class="picker-overlay" id="roomPickerOverlay">
+  <button class="btn-picker-fs" id="btnRoomPickerFs" onclick="toggleFullscreen()">⛶ 전체화면</button>
   <div class="picker-logo">Whispering</div>
   <p class="picker-subtitle">입장할 방을 선택하세요</p>
   <div class="picker-card">
@@ -492,6 +508,7 @@
 
 <!-- ── Section picker overlay ── -->
 <div class="picker-overlay hidden" id="pickerOverlay">
+  <button class="btn-picker-fs" id="btnSectionPickerFs" onclick="toggleFullscreen()">⛶ 전체화면</button>
   <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.3rem;">
     <div class="picker-logo" style="margin-bottom:0;">Whispering</div>
   </div>
@@ -535,7 +552,7 @@
     <span class="session-val" id="sessionDisplay">—</span>
     <div class="conn-dot offline" id="connDot"></div>
     <button class="btn-fs" id="btnFs" onclick="toggleFullscreen()">⛶ 전체화면</button>
-    <button class="btn-lobby" onclick="location.href='/'">← 로비</button>
+    <button class="btn-lobby" onclick="goToLobby()">← 로비</button>
   </div>
 </div>
 
@@ -710,6 +727,7 @@
 
   function hidePicker() {
     document.getElementById('pickerOverlay').classList.add('hidden');
+    document.getElementById('roomPickerOverlay').classList.add('hidden');
     updateSectionUI();
   }
 
@@ -944,25 +962,27 @@
     cssFullscreen = true;
     document.getElementById('stage').classList.add('css-fullscreen');
     document.getElementById('topbar').classList.add('hidden');
+    document.body.classList.add('css-fs-body');
     setFsText(true);
     startIdleTimer();
-    document.body.style.overflow = 'hidden';
   }
 
   function exitCssFs() {
     cssFullscreen = false;
     document.getElementById('stage').classList.remove('css-fullscreen');
     document.getElementById('topbar').classList.remove('hidden');
+    document.body.classList.remove('css-fs-body');
     setFsText(false);
     clearTimeout(idleTimer);
     document.getElementById('btnStageFs').classList.remove('hidden');
-    document.body.style.overflow = '';
   }
 
   function setFsText(inFs) {
-    const text = inFs ? '✕ 전체화면 종료' : '⛶ 전체화면';
-    document.getElementById('btnFs').textContent = text;
-    document.getElementById('btnStageFs').textContent = text;
+    const text = inFs ? '✕ 종료' : '⛶ 전체화면';
+    ['btnFs', 'btnStageFs', 'btnRoomPickerFs', 'btnSectionPickerFs'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    });
   }
 
   function onNativeFsChange() {
@@ -1299,12 +1319,29 @@
   }
 
   function backToRoomPicker() {
-    // If already connected, disconnect first
     if (ws) { try { ws.close(); } catch (_) {} ws = null; }
     SECTION_ID = ''; SECTION_NAME = '';
+    selectedSectionId = ''; selectedSectionName = '';
+    document.getElementById('newSectionInput').value = '';
     document.getElementById('pickerOverlay').classList.add('hidden');
     document.getElementById('roomPickerOverlay').classList.remove('hidden');
     loadRoomPicker();
+  }
+
+  // ── 로비로 이동 ──
+  function goToLobby() {
+    if (ws) { try { ws.close(); } catch (_) {} ws = null; }
+    if (HAS_ROOM_PARAM) {
+      // URL로 직접 들어온 경우 → 그냥 '/'로
+      location.href = '/';
+    } else {
+      // 방 목록에서 들어온 경우 → 방 목록 화면으로
+      SESSION = ''; ROOM_NAME = ''; SECTION_ID = ''; SECTION_NAME = '';
+      selectedSectionId = ''; selectedSectionName = '';
+      document.getElementById('pickerOverlay').classList.add('hidden');
+      document.getElementById('roomPickerOverlay').classList.remove('hidden');
+      loadRoomPicker();
+    }
   }
 
   // ── Init ──
