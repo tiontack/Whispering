@@ -232,14 +232,14 @@
     /* ── Timer ── */
     .timer-widget { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
     .timer-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: #555; font-weight: 600; }
-    .timer-digits { font-size: clamp(3rem,12vw,7rem); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; color: #5eead4; transition: color 0.3s; }
+    .timer-digits { font-size: clamp(6rem,20vw,14rem); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; color: #5eead4; transition: color 0.3s; }
     .timer-digits.warning { color: #fbbf24; }
     .timer-digits.danger  { color: #f87171; animation: blink 0.8s step-end infinite; }
     @keyframes blink { 50% { opacity: 0.2; } }
 
     /* ── Full clock ── */
-    .clock-full { font-size: clamp(4rem,15vw,10rem); font-weight: 800; font-variant-numeric: tabular-nums; color: #5eead4; letter-spacing: 0.05em; }
-    .clock-date { font-size: clamp(1rem,3vw,1.8rem); color: #555; letter-spacing: 0.1em; }
+    .clock-full { font-size: clamp(7rem,25vw,18rem); font-weight: 800; font-variant-numeric: tabular-nums; color: #5eead4; letter-spacing: 0.05em; }
+    .clock-date { font-size: clamp(1.5rem,4vw,2.8rem); color: #555; letter-spacing: 0.1em; }
 
     /* ── Empty ── */
     .empty-state { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
@@ -553,24 +553,11 @@
   <button class="btn-pwa-close" onclick="document.getElementById('pwaBanner').classList.remove('show')">✕</button>
 </div>
 
-<!-- iOS 설치 가이드 모달 -->
+<!-- 브라우저별 전체화면 안내 모달 -->
 <div class="ios-guide hidden" id="iosGuide">
   <div class="ios-guide-box">
-    <div class="ios-guide-title">📲 홈 화면에 추가하는 방법</div>
-    <ol class="ios-steps">
-      <li>
-        <span class="step-num">1</span>
-        <span>Safari 하단 가운데 <strong>공유 버튼 ↑</strong>을 탭하세요</span>
-      </li>
-      <li>
-        <span class="step-num">2</span>
-        <span>메뉴를 아래로 스크롤해서 <strong>'홈 화면에 추가'</strong>를 탭하세요</span>
-      </li>
-      <li>
-        <span class="step-num">3</span>
-        <span>오른쪽 상단 <strong>'추가'</strong>를 탭하면 완료! 앱처럼 전체화면으로 실행됩니다</span>
-      </li>
-    </ol>
+    <div class="ios-guide-title" id="guideTitle">📲 전체화면으로 보는 방법</div>
+    <ol class="ios-steps" id="guideSteps"></ol>
     <button class="btn-ios-close" onclick="document.getElementById('iosGuide').classList.add('hidden')">닫기</button>
   </div>
 </div>
@@ -1083,15 +1070,117 @@
     document.getElementById('pwaBanner').classList.remove('show');
   });
 
+  function getBrowserGuide() {
+    const ua = navigator.userAgent;
+    const isIOS     = /iPhone|iPad|iPod/.test(ua) && !window.MSStream;
+    const isAndroid = /Android/.test(ua);
+    const isMac     = /Macintosh/.test(ua) && !/Mobile/.test(ua);
+
+    if (isIOS) {
+      if (/CriOS\//.test(ua))  // Chrome on iOS
+        return { title: '📲 전체화면으로 보는 방법', sub: 'iOS Chrome은 Safari에서 설치해야 합니다', steps: [
+          'Safari를 열고 같은 주소로 접속하세요',
+          '하단 가운데 <strong>공유 버튼 ↑</strong>을 탭하세요',
+          '<strong>\'홈 화면에 추가\'</strong> → <strong>\'추가\'</strong>를 탭하면 완료!',
+        ]};
+      if (/EdgA?\//.test(ua))  // Edge on iOS
+        return { title: '📲 전체화면으로 보는 방법', sub: 'iOS Edge는 Safari에서 설치해야 합니다', steps: [
+          'Safari를 열고 같은 주소로 접속하세요',
+          '하단 가운데 <strong>공유 버튼 ↑</strong>을 탭하세요',
+          '<strong>\'홈 화면에 추가\'</strong> → <strong>\'추가\'</strong>를 탭하면 완료!',
+        ]};
+      if (/FxiOS\//.test(ua))  // Firefox on iOS
+        return { title: '📲 전체화면으로 보는 방법', sub: 'iOS Firefox는 Safari에서 설치해야 합니다', steps: [
+          'Safari를 열고 같은 주소로 접속하세요',
+          '하단 가운데 <strong>공유 버튼 ↑</strong>을 탭하세요',
+          '<strong>\'홈 화면에 추가\'</strong> → <strong>\'추가\'</strong>를 탭하면 완료!',
+        ]};
+      // iOS Safari (기본)
+      return { title: '📲 전체화면으로 보는 방법', steps: [
+        '하단 가운데 <strong>공유 버튼 ↑</strong>을 탭하세요',
+        '메뉴를 스크롤해서 <strong>\'홈 화면에 추가\'</strong>를 탭하세요',
+        '오른쪽 상단 <strong>\'추가\'</strong>를 탭하면 완료! 앱처럼 전체화면으로 실행됩니다',
+      ]};
+    }
+
+    if (isAndroid) {
+      if (/EdgA?\//.test(ua))
+        return { title: '📲 앱으로 설치하는 방법', steps: [
+          '오른쪽 하단 <strong>더보기(⋯) 버튼</strong>을 탭하세요',
+          '<strong>\'휴대폰에 추가\'</strong>를 탭하세요',
+          '설치 완료! 앱처럼 전체화면으로 실행됩니다',
+        ]};
+      if (/Firefox\//.test(ua))
+        return { title: '📲 앱으로 설치하는 방법', steps: [
+          '오른쪽 상단 <strong>더보기(⋮) 버튼</strong>을 탭하세요',
+          '<strong>\'설치\'</strong> 또는 <strong>\'홈 화면에 추가\'</strong>를 탭하세요',
+          '설치 완료! 앱처럼 전체화면으로 실행됩니다',
+        ]};
+      if (/SamsungBrowser\//.test(ua))
+        return { title: '📲 앱으로 설치하는 방법', steps: [
+          '하단 탭 바의 <strong>메뉴(☰) 버튼</strong>을 탭하세요',
+          '<strong>\'홈 화면에 추가\'</strong>를 탭하세요',
+          '설치 완료! 앱처럼 전체화면으로 실행됩니다',
+        ]};
+      // Android Chrome (기본)
+      return { title: '📲 앱으로 설치하는 방법', steps: [
+        '오른쪽 상단 <strong>더보기(⋮) 버튼</strong>을 탭하세요',
+        '<strong>\'앱 설치\'</strong> 또는 <strong>\'홈 화면에 추가\'</strong>를 탭하세요',
+        '설치 완료! 앱처럼 전체화면으로 실행됩니다',
+      ]};
+    }
+
+    // 데스크톱
+    if (/Edg\//.test(ua))
+      return { title: '⛶ 전체화면으로 보는 방법', steps: [
+        '<strong>F11</strong> 키를 누르면 전체화면으로 전환됩니다',
+        '또는 주소창 오른쪽 <strong>앱 설치(⊕) 버튼</strong>을 클릭해 앱으로 설치하세요',
+        '앱으로 설치하면 주소창 없이 전체화면으로 실행됩니다',
+      ]};
+    if (/Chrome\//.test(ua))
+      return { title: '⛶ 전체화면으로 보는 방법', steps: [
+        '<strong>F11</strong> 키를 누르면 전체화면으로 전환됩니다 (Mac: <strong>⌃⌘F</strong>)',
+        '또는 주소창 오른쪽 <strong>설치(⊕) 버튼</strong>을 클릭해 앱으로 설치하세요',
+        '앱으로 설치하면 주소창 없이 전체화면으로 실행됩니다',
+      ]};
+    if (/Firefox\//.test(ua))
+      return { title: '⛶ 전체화면으로 보는 방법', steps: [
+        '<strong>F11</strong> 키를 누르면 전체화면으로 전환됩니다',
+        'Mac에서는 <strong>⌃⌘F</strong> 또는 메뉴 보기 → 전체화면으로 전환',
+      ]};
+    if (/Safari\//.test(ua) && isMac)
+      return { title: '⛶ 전체화면으로 보는 방법', steps: [
+        '상단 메뉴에서 <strong>보기 → 전체화면으로 전환</strong>을 클릭하세요',
+        '또는 키보드 단축키 <strong>⌃⌘F</strong>를 사용하세요',
+      ]};
+
+    return { title: '⛶ 전체화면으로 보는 방법', steps: [
+      '<strong>F11</strong> 키를 누르면 전체화면으로 전환됩니다',
+    ]};
+  }
+
+  function showBrowserGuide() {
+    const guide = getBrowserGuide();
+    document.getElementById('guideTitle').textContent = guide.title;
+    const stepsEl = document.getElementById('guideSteps');
+    stepsEl.innerHTML = guide.steps.map((s, i) => `
+      <li>
+        <span class="step-num">${i + 1}</span>
+        <span>${s}</span>
+      </li>`).join('');
+    if (guide.sub) {
+      stepsEl.insertAdjacentHTML('beforebegin', `<p style="font-size:0.8rem;color:#888;text-align:center;margin-bottom:0.8rem;">${guide.sub}</p>`);
+    }
+    document.getElementById('iosGuide').classList.remove('hidden');
+  }
+
   function triggerPwaInstall() {
     if (_deferredInstall) {
-      // Android Chrome: 네이티브 설치 다이얼로그 실행 (완전 자동화)
       _deferredInstall.prompt();
       _deferredInstall.userChoice.then(() => { _deferredInstall = null; });
       document.getElementById('pwaBanner').classList.remove('show');
-    } else if (isIOS) {
-      // iOS Safari: 단계별 안내 모달 표시
-      document.getElementById('iosGuide').classList.remove('hidden');
+    } else {
+      showBrowserGuide();
     }
   }
 
@@ -1103,6 +1192,17 @@
     setTimeout(() => banner.classList.add('show'), 1500);
     setTimeout(() => banner.classList.remove('show'), 10000);
   }
+
+  // 배너 버튼 텍스트를 브라우저에 맞게 설정
+  (function() {
+    const ua = navigator.userAgent;
+    const btn = document.getElementById('btnPwaInstall');
+    if (!btn) return;
+    if (/Android/.test(ua)) btn.textContent = '앱으로 설치';
+    else if (/Edg\//.test(ua) || /Chrome\//.test(ua)) btn.textContent = '앱으로 설치';
+    else if (/Firefox\//.test(ua)) btn.textContent = '전체화면 안내';
+    else btn.textContent = '홈 화면에 추가';
+  })();
 
   // iOS: 모바일이고 standalone 아니면 배너 표시 (beforeinstallprompt 없으므로 수동 트리거)
   if (!isStandalone && isIOS) showPwaBanner();
