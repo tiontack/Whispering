@@ -510,7 +510,7 @@
       <button class="btn-new-section" onclick="enterWithNewSection()">입장</button>
     </div>
 
-    <button class="btn-enter" id="btnEnter" onclick="enterRoom()" disabled>입장하기</button>
+    <button class="btn-enter" id="btnEnter" onclick="enterRoom()">입장하기</button>
   </div>
 </div>
 
@@ -672,9 +672,15 @@
   }
 
   function enterRoom() {
-    if (!selectedSectionId) return;
-    SECTION_ID   = selectedSectionId;
-    SECTION_NAME = selectedSectionName;
+    // 분과를 따로 선택하지 않았으면 새 분과 입력값 또는 기본값 '일반' 사용
+    if (!selectedSectionId) {
+      const inputVal = document.getElementById('newSectionInput').value.trim();
+      SECTION_ID   = 'sec-' + Date.now();
+      SECTION_NAME = inputVal || '일반';
+    } else {
+      SECTION_ID   = selectedSectionId;
+      SECTION_NAME = selectedSectionName;
+    }
     hidePicker();
     connect();
   }
