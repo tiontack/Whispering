@@ -172,7 +172,7 @@
     .stage {
       flex: 1; display: flex; flex-direction: column; align-items: center;
       justify-content: center; padding: 2rem; gap: 2rem;
-      position: relative; min-height: 0;
+      position: relative; min-height: 0; overflow: hidden;
     }
 
     .clock-widget {
@@ -232,14 +232,14 @@
     /* ── Timer ── */
     .timer-widget { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
     .timer-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: #555; font-weight: 600; }
-    .timer-digits { font-size: clamp(6rem,20vw,14rem); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; color: #5eead4; transition: color 0.3s; }
+    .timer-digits { font-size: clamp(3.5rem,16vmin,12rem); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; color: #5eead4; transition: color 0.3s; line-height: 1; }
     .timer-digits.warning { color: #fbbf24; }
     .timer-digits.danger  { color: #f87171; animation: blink 0.8s step-end infinite; }
     @keyframes blink { 50% { opacity: 0.2; } }
 
     /* ── Full clock ── */
-    .clock-full { font-size: clamp(7rem,25vw,18rem); font-weight: 800; font-variant-numeric: tabular-nums; color: #5eead4; letter-spacing: 0.05em; }
-    .clock-date { font-size: clamp(1.5rem,4vw,2.8rem); color: #555; letter-spacing: 0.1em; }
+    .clock-full { font-size: clamp(3.5rem,18vmin,14rem); font-weight: 800; font-variant-numeric: tabular-nums; color: #5eead4; letter-spacing: 0.05em; line-height: 1.05; }
+    .clock-date { font-size: clamp(1rem,3vmin,2rem); color: #555; letter-spacing: 0.1em; }
 
     /* ── Empty ── */
     .empty-state { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
