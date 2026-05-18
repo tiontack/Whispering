@@ -2,7 +2,9 @@ name: 🚀 Deploy to Railway
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'claude/whispering-presenter-app-774bo'
   workflow_dispatch:  # 수동 실행 버튼
 
 jobs:
