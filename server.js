@@ -517,6 +517,10 @@ app.post('/api/presets', (req, res) => {
   res.json({ ok: true });
 });
 
+// ── Health check (Koyeb / load balancer용) ────────────────────────────────────
+
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
 // ── Page routes ───────────────────────────────────────────────────────────────
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
