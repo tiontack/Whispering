@@ -7,9 +7,3 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DB_PATH
-        value: /opt/render/project/src/data/whispering.db
-    disk:
-      name: whispering-data
-      mountPath: /opt/render/project/src/data
-      sizeGB: 1
